@@ -1,5 +1,10 @@
 /* Custom animations for the wellness app */
 
+/* Smooth scrolling for all elements - optimized */
+* {
+  scroll-behavior: auto;
+}
+
 @keyframes blob {
   0% {
     transform: translate(0px, 0px) scale(1);
@@ -69,6 +74,15 @@
   }
 }
 
+@keyframes fade-in-fast {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes fade-in-up {
   from {
     opacity: 0;
@@ -127,8 +141,17 @@
   }
 }
 
+@keyframes slide-infinite {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 .animate-blob {
-  animation: blob 7s infinite;
+  animation: blob 7s ease-in-out infinite;
 }
 
 .animation-delay-2000 {
@@ -144,7 +167,7 @@
 }
 
 .animate-pulse-slow {
-  animation: pulse-slow 3s ease-in-out infinite;
+  animation: pulse-slow 4s ease-in-out infinite;
 }
 
 .animate-spin-slow {
@@ -160,17 +183,25 @@
 }
 
 .animate-fade-in {
-  animation: fade-in 1s ease-in-out;
+  animation: fade-in 0.6s ease-in-out;
+}
+
+.animate-fade-in-fast {
+  animation: fade-in-fast 0.4s ease-out forwards;
 }
 
 .animate-fade-in-up {
-  animation: fade-in-up 0.8s ease-out forwards;
+  animation: fade-in-up 0.5s ease-out forwards;
   opacity: 0;
 }
 
 .animate-slide-in-left {
-  animation: slide-in-left 0.8s ease-out forwards;
+  animation: slide-in-left 0.6s ease-out forwards;
   opacity: 0;
+}
+
+.animation-delay-100 {
+  animation-delay: 0.1s;
 }
 
 .animation-delay-200 {
@@ -210,6 +241,11 @@
   animation: wave 2s ease-in-out infinite;
 }
 
+.animate-slide-infinite {
+  animation: slide-infinite 25s linear infinite;
+  will-change: transform;
+}
+
 /* Hide scrollbar but keep functionality */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
@@ -220,7 +256,36 @@
   scrollbar-width: none;
 }
 
-/* Smooth scrolling */
+/* Smooth scrolling - optimized */
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+}
+
+/* Smoother transitions */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* GPU acceleration for better performance */
+.animate-slide-infinite,
+.animate-float,
+.animate-pulse-slow,
+.animate-blob {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize scrolling performance */
+.scroll-smooth {
+  scroll-behavior: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hardware acceleration for transforms */
+.hw-accelerate {
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
 }
