@@ -15,11 +15,16 @@ const FeatureCards = ({ activeFeature, setActiveFeature }) => {
         <div
           key={index}
           onClick={() => setActiveFeature(index)}
-          className={`group relative p-4 rounded-2xl cursor-pointer animate-fade-in-up transition-all duration-500 ${
+          className={`group relative p-6 rounded-2xl cursor-pointer animate-fade-in-up transition-all duration-500 ${
             activeFeature !== index ? 'hover:shadow-2xl' : ''
           }`}
           style={{
             animationDelay: `${index * 100 + 400}ms`,
+            minHeight: '240px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
             background: activeFeature === index 
               ? 'linear-gradient(135deg, #A38AEB 0%, #9370DB 100%)' 
               : '#FFFFFF',
@@ -46,12 +51,12 @@ const FeatureCards = ({ activeFeature, setActiveFeature }) => {
             }
           }}
         >
-          <div className={`feature-icon mb-2 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${
+          <div className={`feature-icon mb-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${
             activeFeature === index ? 'text-white' : 'text-purple-600'
           }`}>
             <feature.icon />
           </div>
-          <p className={`feature-text text-[10px] font-semibold tracking-wider uppercase leading-tight ${
+          <p className={`feature-text text-xs font-semibold tracking-wider uppercase leading-tight text-center ${
             activeFeature === index ? 'text-white' : 'text-gray-700'
           }`}>
             {feature.name}

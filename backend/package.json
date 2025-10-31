@@ -1,16 +1,40 @@
 {
-  "name": "backend",
+  "name": "aarogini-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Aarogini Wellness App Backend API",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "seed": "node seed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "wellness",
+    "health",
+    "women",
+    "api"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "express": "^5.1.0"
+    "@genkit-ai/google-genai": "^1.22.0",
+    "axios": "^1.13.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "form-data": "^4.0.4",
+    "genkit": "^1.22.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.2",
+    "multer": "^2.0.2",
+    "pdf-parse": "^1.1.1",
+    "sharp": "^0.34.4",
+    "tesseract.js": "^6.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

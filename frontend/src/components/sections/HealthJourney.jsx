@@ -28,8 +28,9 @@ const HealthJourney = () => {
     { icon: "💓", name: "Cardiovascular Disease" },
   ]
 
-  // Calculate number of dots needed (assuming 6-7 cards visible at a time)
-  const totalDots = Math.ceil(healthJourney.length / 3)
+  // Calculate number of dots needed for 2 rows x 4 columns = 8 cards per page
+  const cardsPerPage = 8
+  const totalPages = Math.ceil(healthJourney.length / cardsPerPage)
 
   useEffect(() => {
     const container = scrollContainerRef.current
@@ -39,19 +40,19 @@ const HealthJourney = () => {
       const scrollLeft = container.scrollLeft
       const scrollWidth = container.scrollWidth - container.clientWidth
       const scrollPercentage = scrollLeft / scrollWidth
-      const newActiveDot = Math.round(scrollPercentage * (totalDots - 1))
+      const newActiveDot = Math.round(scrollPercentage * (totalPages - 1))
       setActiveDot(newActiveDot)
     }
 
     container.addEventListener('scroll', handleScroll)
     return () => container.removeEventListener('scroll', handleScroll)
-  }, [totalDots])
+  }, [totalPages])
 
   const scrollLeft = () => {
     const container = scrollContainerRef.current
     if (!container) return
     
-    const scrollAmount = container.clientWidth * 0.8
+    const scrollAmount = container.clientWidth
     container.scrollBy({
       left: -scrollAmount,
       behavior: 'auto'
@@ -62,7 +63,7 @@ const HealthJourney = () => {
     const container = scrollContainerRef.current
     if (!container) return
     
-    const scrollAmount = container.clientWidth * 0.8
+    const scrollAmount = container.clientWidth
     container.scrollBy({
       left: scrollAmount,
       behavior: 'auto'
@@ -77,7 +78,7 @@ const HealthJourney = () => {
         {/* Card Progress Indicator */}
         <div className="flex items-center gap-3">
           <div className="text-sm font-semibold text-purple-600">
-            {Math.min(Math.floor(activeDot * 3) + 1, healthJourney.length)}-{Math.min(Math.floor(activeDot * 3) + 7, healthJourney.length)} <span className="text-gray-400">of {healthJourney.length}</span>
+            {Math.min(activeDot * cardsPerPage + 1, healthJourney.length)}-{Math.min((activeDot + 1) * cardsPerPage, healthJourney.length)} <span className="text-gray-400">of {healthJourney.length}</span>
           </div>
           
           {/* Progress Bar */}
@@ -85,15 +86,15 @@ const HealthJourney = () => {
             <div 
               className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-300"
               style={{ 
-                width: `${((activeDot + 1) / totalDots) * 100}%` 
+                width: `${((activeDot + 1) / totalPages) * 100}%` 
               }}
             />
           </div>
         </div>
       </div>
       
-      {/* Scrollable Health Cards - Single Row with Fixed Height */}
-      <div className="relative" style={{ height: '180px' }}>
+      {/* Scrollable Health Cards - 2 Rows x 4 Columns Sliding Horizontally */}
+      <div className="relative" style={{ height: '520px' }}>
         {/* Left Arrow Button */}
         <button
           onClick={scrollLeft}
@@ -128,25 +129,38 @@ const HealthJourney = () => {
 
         <div 
           ref={scrollContainerRef}
-          className="flex gap-4 overflow-x-auto overflow-y-hidden pb-2 scrollbar-hide h-full snap-x snap-mandatory hw-accelerate"
+          className="overflow-x-auto overflow-y-hidden scrollbar-hide h-full snap-x snap-mandatory hw-accelerate"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         >
-          {healthJourney.map((item, index) => (
-            <div
-              key={index}
-              className="group snap-start animate-fade-in-up shrink-0"
-              style={{ animationDelay: `${index * 40 + 600}ms`, width: '180px' }}
-            >
-              <div className="bg-white p-4 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 hover:-translate-y-1 h-full flex flex-col items-center justify-center">
-                <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mb-2.5 group-hover:rotate-12 transition-transform duration-300">
-                  <div className="transform group-hover:scale-125 transition-transform duration-200 text-3xl">
-                    {item.icon}
+          <div className="inline-grid grid-rows-2 grid-flow-col gap-3 h-full pb-2">
+            {healthJourney.map((item, index) => (
+              <div
+                key={index}
+                className="group snap-start animate-fade-in-up"
+                style={{
+                  animationDelay: `${index * 40 + 600}ms`,
+                  width: 'calc((100vw - 120px) / 4)',
+                  minWidth: '200px',
+                  maxWidth: '300px'
+                }}
+              >
+                <div
+                  className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 hover:-translate-y-1 flex flex-col items-center justify-center"
+                  style={{
+                    minHeight: '240px',
+                    height: '100%'
+                  }}
+                >
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform duration-300">
+                    <div className="transform group-hover:scale-125 transition-transform duration-200 text-4xl">
+                      {item.icon}
+                    </div>
                   </div>
+                  <p className="text-sm font-semibold text-center leading-tight" style={{ color: '#3B3A60' }}>{item.name}</p>
                 </div>
-                <p className="text-sm font-medium text-center leading-tight" style={{ color: '#3B3A60' }}>{item.name}</p>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
         
         {/* Gradient fade on sides */}

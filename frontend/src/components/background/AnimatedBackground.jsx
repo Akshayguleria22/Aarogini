@@ -114,13 +114,13 @@ const AnimatedBackground = ({ imageLoaded, setImageLoaded }) => {
       </div>
 
       {/* Women Illustration - Top Right (shifted to center) */}
-      <div className="absolute top-8 right-32 z-20 animate-fade-in">
+      <div className="absolute top-30 right-32 z-20 animate-fade-in">
         <div className="relative w-72 h-72">
           {/* Glow effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-purple-300 via-pink-200 to-purple-200 rounded-full blur-2xl opacity-40 animate-pulse-slow"></div>
           
-          {/* Colored circle background */}
-          <div className="absolute inset-2 rounded-full shadow-xl" style={{ background: 'linear-gradient(135deg, #F8F7FC 0%, #EDE7F6 50%, #E8DFF5 100%)' }}></div>
+          {/* Colored circle background
+          <div className="absolute inset-2 rounded-full shadow-xl" style={{ background: 'linear-gradient(135deg, #F8F7FC 0%, #EDE7F6 50%, #E8DFF5 100%)' }}></div> */}
           
           {/* Women image */}
           <div className="absolute inset-0 flex items-center justify-center p-6">

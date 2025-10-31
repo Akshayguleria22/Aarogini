@@ -1,0 +1,59 @@
+import { useState, useEffect } from 'react'
+import { savePeriodData, getPeriodData, saveDailySymptoms } from '../../services/periodService'
+
+const PeriodTracker = ({ onClose }) => {
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState(null)
+  const [showPeriodChart, setShowPeriodChart] = useState(false)
+  const [periodStartDate, setPeriodStartDate] = useState(null)
+  const [currentDayIndex, setCurrentDayIndex] = useState(0)
+  const [currentTimeSlot, setCurrentTimeSlot] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [currentPeriodId, setCurrentPeriodId] = useState(null)
+  
+  const [periodData, setPeriodData] = useState({})
+  const [symptomTracking, setSymptomTracking] = useState({})
+
+  // Load period data from backend on mount
+  useEffect(() => {
+    const loadPeriodData = async () => {
+      try {
+        setLoading(true)
+        const response = await getPeriodData()
+        
+        if (response.success && response.data) {
+          const formattedData = {}
+          response.data.forEach(period => {
+            const date = new Date(period.cycleStartDate).toISOString().split('T')[0]
+            formattedData[date] = {
+              type: 'period',
+              isPeriod: true,
+              id: period._id,
+              ...period
+            }
+          })
+          setPeriodData(formattedData)
+        }
+      } catch (error) {
+        console.error('Error loading period data:', error)
+        const localData = localStorage.getItem('periodData')
+        if (localData) setPeriodData(JSON.parse(localData))
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadPeriodData()
+  }, [])
+
+  // Save period data whenever it changes
+  useEffect(() => {
+    if (loading) return
+    try {
+      localStorage.setItem('periodData', JSON.stringify(periodData))
+    } catch (error) {
+      console.error('Error saving to localStorage:', error)
+    }
+  }, [periodData, loading])
+
+  const moodEmojis = ['', '', '', '', '', '', '', '']
+  const symptomTypes = ['Period Cramps', 'Blood Flow', 'Mood Swings', 'Energy Level', 'Bloating', 'Headache', 'Weakness']
