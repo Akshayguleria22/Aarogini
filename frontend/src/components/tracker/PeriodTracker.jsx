@@ -10,6 +10,10 @@ const PeriodTracker = ({ onClose }) => {
   const [currentTimeSlot, setCurrentTimeSlot] = useState(0)
   const [loading, setLoading] = useState(true)
   const [currentPeriodId, setCurrentPeriodId] = useState(null)
+  const [lastCycleStart, setLastCycleStart] = useState(null)
+  const [cycleLength, setCycleLength] = useState(28)
+  const [periodLength, setPeriodLength] = useState(5)
+  const [predictions, setPredictions] = useState({ nextPeriod: null, ovulation: null, fertile: null, cycleDay: null })
   
   const [periodData, setPeriodData] = useState({})
   const [symptomTracking, setSymptomTracking] = useState({})
@@ -33,6 +37,13 @@ const PeriodTracker = ({ onClose }) => {
             }
           })
           setPeriodData(formattedData)
+          // compute latest start and defaults
+          if (response.data.length > 0) {
+            const latest = response.data.reduce((a, b) => new Date(a.cycleStartDate) > new Date(b.cycleStartDate) ? a : b)
+            setLastCycleStart(new Date(latest.cycleStartDate))
+            if (latest.cycleLength) setCycleLength(latest.cycleLength)
+            if (latest.periodLength) setPeriodLength(latest.periodLength)
+          }
         }
       } catch (error) {
         console.error('Error loading period data:', error)
@@ -44,6 +55,24 @@ const PeriodTracker = ({ onClose }) => {
     }
     loadPeriodData()
   }, [])
+  // compute predictions whenever inputs change
+  useEffect(() => {
+    const start = periodStartDate || lastCycleStart
+    if (!start) {
+      setPredictions({ nextPeriod: null, ovulation: null, fertile: null, cycleDay: null })
+      return
+    }
+    const addDays = (d, days) => { const x = new Date(d); x.setDate(x.getDate() + days); return x }
+    const next = addDays(start, Number(cycleLength || 28))
+    const ovu = addDays(start, Number(cycleLength || 28) - 14)
+    const fertile = { from: addDays(ovu, -3), to: addDays(ovu, 2) }
+    const today = new Date()
+    const diff = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1
+    const day = diff > 0 ? ((diff - 1) % Number(cycleLength || 28)) + 1 : 1
+    setPredictions({ nextPeriod: next, ovulation: ovu, fertile, cycleDay: day })
+  }, [periodStartDate, lastCycleStart, cycleLength])
+
+  const fmt = (d, opts = { month: 'short', day: 'numeric', year: 'numeric' }) => d ? new Date(d).toLocaleDateString('en-US', opts) : '—'
 
   // Save period data whenever it changes
   useEffect(() => {
@@ -119,6 +148,10 @@ const PeriodTracker = ({ onClose }) => {
       const response = await savePeriodData(periodEntry)
       if (response.success && response.data && response.data._id) {
         setCurrentPeriodId(response.data._id)
+        // sync cycle parameters for predictions
+        if (response.data.cycleLength) setCycleLength(response.data.cycleLength)
+        if (response.data.periodLength) setPeriodLength(response.data.periodLength)
+        setLastCycleStart(newDate)
         // Update local state with server ID
         setPeriodData(prev => ({
           ...prev,
@@ -315,7 +348,7 @@ const PeriodTracker = ({ onClose }) => {
           </div>
 
           {/* Period Started Header */}
-          <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl p-4 text-white shadow-lg">
+          <div className="bg-linear-to-r from-pink-500 to-purple-600 rounded-xl p-4 text-white shadow-lg">
             <h2 className="text-xl font-bold">Period Started</h2>
             <p className="text-xs text-white/90">Track your symptoms every 3 hours</p>
           </div>
@@ -325,7 +358,7 @@ const PeriodTracker = ({ onClose }) => {
             <div className="overflow-x-auto h-full">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gradient-to-r from-purple-100 to-pink-100">
+                  <tr className="bg-linear-to-r from-purple-100 to-pink-100">
                     <th className="px-3 py-1.5 text-left font-bold text-gray-800 sticky left-0 bg-purple-100 text-xs">
                       Symptoms
                     </th>
@@ -333,7 +366,7 @@ const PeriodTracker = ({ onClose }) => {
                       const date = new Date(startDate)
                       date.setDate(date.getDate() + dayIndex)
                       return (
-                        <th key={dayIndex} className="px-3 py-1.5 text-center font-semibold text-gray-700 min-w-[80px]">
+                        <th key={dayIndex} className="px-3 py-1.5 text-center font-semibold text-gray-700 min-w-20">
                           <div className="text-xs">Day {dayIndex + 1}</div>
                           <div className="text-[10px] text-gray-600">{date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
                         </th>
@@ -397,7 +430,7 @@ const PeriodTracker = ({ onClose }) => {
                 {hygieneTips.map((item, index) => (
                   <div
                     key={index}
-                    className={`p-2.5 rounded-lg bg-gradient-to-r ${item.color} text-white transition-all duration-300 hover:scale-105`}
+                    className={`p-2.5 rounded-lg bg-linear-to-r ${item.color} text-white transition-all duration-300 hover:scale-105`}
                   >
                     <div className="flex flex-col items-center space-y-1">
                       <span className="text-xl">{item.icon}</span>
@@ -415,37 +448,37 @@ const PeriodTracker = ({ onClose }) => {
                 <span>Nutrition Recommendations</span>
               </h3>
               <div className="grid grid-cols-3 gap-2">
-                <div className="p-2 rounded-lg bg-gradient-to-r from-green-400 to-emerald-400 text-white">
+                <div className="p-2 rounded-lg bg-linear-to-r from-green-400 to-emerald-400 text-white">
                   <div className="flex flex-col items-center space-y-1">
                     <span className="text-xl">🥬</span>
                     <p className="text-[9px] font-medium leading-tight text-center">Leafy greens for iron</p>
                   </div>
                 </div>
-                <div className="p-2 rounded-lg bg-gradient-to-r from-orange-400 to-amber-400 text-white">
+                <div className="p-2 rounded-lg bg-linear-to-r from-orange-400 to-amber-400 text-white">
                   <div className="flex flex-col items-center space-y-1">
                     <span className="text-xl">🥜</span>
                     <p className="text-[9px] font-medium leading-tight text-center">Nuts for magnesium</p>
                   </div>
                 </div>
-                <div className="p-2 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-300 text-white">
+                <div className="p-2 rounded-lg bg-linear-to-r from-yellow-400 to-orange-300 text-white">
                   <div className="flex flex-col items-center space-y-1">
                     <span className="text-xl">🍊</span>
                     <p className="text-[9px] font-medium leading-tight text-center">Citrus for vitamin C</p>
                   </div>
                 </div>
-                <div className="p-2 rounded-lg bg-gradient-to-r from-red-400 to-rose-400 text-white">
+                <div className="p-2 rounded-lg bg-linear-to-r from-red-400 to-rose-400 text-white">
                   <div className="flex flex-col items-center space-y-1">
                     <span className="text-xl">🍓</span>
                     <p className="text-[9px] font-medium leading-tight text-center">Berries for antioxidants</p>
                   </div>
                 </div>
-                <div className="p-2 rounded-lg bg-gradient-to-r from-blue-400 to-cyan-400 text-white">
+                <div className="p-2 rounded-lg bg-linear-to-r from-blue-400 to-cyan-400 text-white">
                   <div className="flex flex-col items-center space-y-1">
                     <span className="text-xl">🐟</span>
                     <p className="text-[9px] font-medium leading-tight text-center">Fish for omega-3</p>
                   </div>
                 </div>
-                <div className="p-2 rounded-lg bg-gradient-to-r from-purple-400 to-pink-400 text-white">
+                <div className="p-2 rounded-lg bg-linear-to-r from-purple-400 to-pink-400 text-white">
                   <div className="flex flex-col items-center space-y-1">
                     <span className="text-xl">🍫</span>
                     <p className="text-[9px] font-medium leading-tight text-center">Dark chocolate (small amounts)</p>
@@ -487,7 +520,7 @@ const PeriodTracker = ({ onClose }) => {
                 }
                 
                 return (
-                  <div key={symptom} className="p-2 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
+                  <div key={symptom} className="p-2 bg-linear-to-br from-purple-50 to-pink-50 rounded-lg">
                     <div className="font-semibold text-gray-700 mb-2 text-xs">{symptom}</div>
                     <div className="space-y-2">
                       {/* Emoji Display with Flow color variation */}
@@ -582,24 +615,15 @@ const PeriodTracker = ({ onClose }) => {
           </div>
 
           {/* Predictions */}
-          <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl p-3">
+          <div className="bg-linear-to-br from-purple-100 to-pink-100 rounded-xl p-3">
             <h4 className="font-bold text-gray-800 mb-2 flex items-center space-x-1.5 text-xs">
               <span>📅</span>
               <span>Predictions</span>
             </h4>
             <div className="space-y-1.5 text-[10px]">
-              <p className="flex justify-between">
-                <span className="text-gray-600">Next Period:</span>
-                <span className="font-semibold text-purple-700">Nov 25, 2025</span>
-              </p>
-              <p className="flex justify-between">
-                <span className="text-gray-600">Cycle Length:</span>
-                <span className="font-semibold text-purple-700">28 days</span>
-              </p>
-              <p className="flex justify-between">
-                <span className="text-gray-600">Ovulation:</span>
-                <span className="font-semibold text-purple-700">Nov 11, 2025</span>
-              </p>
+              <p className="flex justify-between"><span className="text-gray-600">Next Period:</span><span className="font-semibold text-purple-700">{fmt(predictions.nextPeriod)}</span></p>
+              <p className="flex justify-between"><span className="text-gray-600">Cycle Length:</span><span className="font-semibold text-purple-700">{cycleLength} days</span></p>
+              <p className="flex justify-between"><span className="text-gray-600">Ovulation:</span><span className="font-semibold text-purple-700">{fmt(predictions.ovulation)}</span></p>
             </div>
           </div>
         </div>
@@ -609,10 +633,10 @@ const PeriodTracker = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-6xl h-[88vh] bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-scale-in">
+  <div className="relative w-full max-w-6xl h-[88vh] bg-linear-to-br from-pink-50 to-purple-50 rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-scale-in">
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-pink-500 to-purple-600 p-3 text-white">
+  <div className="bg-linear-to-r from-pink-500 to-purple-600 p-3 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
@@ -697,7 +721,7 @@ const PeriodTracker = ({ onClose }) => {
                           key={day}
                           className={`w-9 h-9 rounded-md cursor-pointer transition-all duration-300 flex items-center justify-center relative ${
                             isToday 
-                              ? 'bg-gradient-to-br from-purple-500 to-pink-500 shadow-md scale-105' 
+                              ? 'bg-linear-to-br from-purple-500 to-pink-500 shadow-md scale-105'
                               : dayData?.isPeriod
                               ? 'bg-red-500'
                               : dayData?.type === 'pre-symptoms' 
@@ -721,21 +745,21 @@ const PeriodTracker = ({ onClose }) => {
 
                   {/* Date Selection Options */}
                   {selectedDate && (
-                    <div className="mt-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg animate-fade-in">
+                    <div className="mt-3 p-3 bg-linear-to-r from-purple-50 to-pink-50 rounded-lg animate-fade-in">
                       <p className="text-xs font-semibold text-gray-700 mb-2">
                         {monthNames[month]} {selectedDate}, {year}
                       </p>
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={handlePeriodStart}
-                          className="p-2 bg-gradient-to-r from-red-400 to-pink-500 text-white rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col items-center space-y-1"
+                          className="p-2 bg-linear-to-r from-red-400 to-pink-500 text-white rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col items-center space-y-1"
                         >
                           <span className="text-xl">🩸</span>
                           <span className="text-[10px]">Period Started</span>
                         </button>
                         <button
                           onClick={handlePreSymptoms}
-                          className="p-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-white rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col items-center space-y-1"
+                          className="p-2 bg-linear-to-r from-yellow-400 to-orange-400 text-white rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col items-center space-y-1"
                         >
                           <span className="text-xl">⚠️</span>
                           <span className="text-[10px]">Pre-Symptoms</span>
@@ -757,7 +781,7 @@ const PeriodTracker = ({ onClose }) => {
                       <span className="text-gray-700">Pre-Symptoms</span>
                     </div>
                     <div className="flex items-center space-x-1.5">
-                      <div className="w-2.5 h-2.5 rounded bg-gradient-to-br from-purple-500 to-pink-500"></div>
+                      <div className="w-2.5 h-2.5 rounded bg-linear-to-br from-purple-500 to-pink-500"></div>
                       <span className="text-gray-700">Today</span>
                     </div>
                   </div>
@@ -773,7 +797,7 @@ const PeriodTracker = ({ onClose }) => {
                     {hygieneTips.map((item, index) => (
                       <div
                         key={index}
-                        className={`p-2 rounded-lg bg-gradient-to-r ${item.color} text-white transition-all duration-300`}
+                        className={`p-2 rounded-lg bg-linear-to-r ${item.color} text-white transition-all duration-300`}
                       >
                         <div className="flex items-start space-x-1.5">
                           <span className="text-base">{item.icon}</span>
@@ -789,7 +813,7 @@ const PeriodTracker = ({ onClose }) => {
               <div className="lg:col-span-3 overflow-y-auto">
                 <div className="space-y-3 h-full">
                   {/* Predictions Card */}
-                  <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl p-3">
+                  <div className="bg-linear-to-br from-purple-100 to-pink-100 rounded-xl p-3">
                     <h4 className="font-bold text-gray-800 mb-3 flex items-center space-x-1.5 text-xs">
                       <span className="text-sm">📅</span>
                       <span>Cycle Predictions</span>
@@ -797,33 +821,33 @@ const PeriodTracker = ({ onClose }) => {
                     <div className="grid grid-cols-2 gap-2 text-[10px]">
                       <div className="bg-white/60 rounded-lg p-2.5">
                         <p className="text-gray-600 font-medium mb-1">Next Period:</p>
-                        <p className="font-bold text-purple-700 text-xs">Nov 25, 2025</p>
+                          <p className="font-bold text-purple-700 text-xs">{fmt(predictions.nextPeriod)}</p>
                       </div>
                       <div className="bg-white/60 rounded-lg p-2.5">
                         <p className="text-gray-600 font-medium mb-1">Cycle Length:</p>
-                        <p className="font-bold text-purple-700 text-xs">28 days</p>
+                          <p className="font-bold text-purple-700 text-xs">{cycleLength} days</p>
                       </div>
                       <div className="bg-white/60 rounded-lg p-2.5">
                         <p className="text-gray-600 font-medium mb-1">Ovulation:</p>
-                        <p className="font-bold text-purple-700 text-xs">Nov 11, 2025</p>
+                          <p className="font-bold text-purple-700 text-xs">{fmt(predictions.ovulation)}</p>
                       </div>
                       <div className="bg-white/60 rounded-lg p-2.5">
                         <p className="text-gray-600 font-medium mb-1">Period Duration:</p>
-                        <p className="font-bold text-purple-700 text-xs">5 days</p>
+                          <p className="font-bold text-purple-700 text-xs">{periodLength} days</p>
                       </div>
                       <div className="bg-white/60 rounded-lg p-2.5">
                         <p className="text-gray-600 font-medium mb-1">Fertile Window:</p>
-                        <p className="font-bold text-purple-700 text-xs">Nov 8-13</p>
+                          <p className="font-bold text-purple-700 text-xs">{predictions.fertile ? `${new Date(predictions.fertile.from).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(predictions.fertile.to).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : '—'}</p>
                       </div>
                       <div className="bg-white/60 rounded-lg p-2.5">
                         <p className="text-gray-600 font-medium mb-1">Cycle Day:</p>
-                        <p className="font-bold text-purple-700 text-xs">Day 4 of 28</p>
+                          <p className="font-bold text-purple-700 text-xs">{predictions.cycleDay ? `Day ${predictions.cycleDay} of ${cycleLength}` : `— of ${cycleLength}`}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Health Tips Card */}
-                  <div className="bg-gradient-to-br from-pink-100 to-rose-100 rounded-xl p-3">
+                  <div className="bg-linear-to-br from-pink-100 to-rose-100 rounded-xl p-3">
                     <h4 className="font-bold text-gray-800 mb-2 flex items-center space-x-1.5 text-xs">
                       <span className="text-sm">💝</span>
                       <span>Health Tips</span>
@@ -845,7 +869,7 @@ const PeriodTracker = ({ onClose }) => {
                   </div>
 
                   {/* Wellness Reminder Card */}
-                  <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl p-3">
+                  <div className="bg-linear-to-br from-blue-100 to-cyan-100 rounded-xl p-3">
                     <h4 className="font-bold text-gray-800 mb-2 flex items-center space-x-1.5 text-xs">
                       <span className="text-sm">🌟</span>
                       <span>Wellness Reminders</span>

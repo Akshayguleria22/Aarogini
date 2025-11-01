@@ -3,7 +3,9 @@ import {
   searchMedicine,
   compareMedicines,
   checkInteractions,
-  getMedicineCategories
+  getMedicineCategories,
+  fetchOpenFdaDetails,
+  fetchOpenFdaEvents
 } from '../../services/medicineSearchService.js';
 
 const MedicineSearch = ({ onClose }) => {
@@ -15,6 +17,8 @@ const MedicineSearch = ({ onClose }) => {
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResult, setSearchResult] = useState(null);
+  const [fdaDetails, setFdaDetails] = useState(null);
+  const [fdaEvents, setFdaEvents] = useState(null);
 
   // Compare state
   const [compareMeds, setCompareMeds] = useState(['', '']);
@@ -52,11 +56,31 @@ const MedicineSearch = ({ onClose }) => {
     setLoading(true);
     setError('');
     setSearchResult(null);
+    setFdaDetails(null);
+    setFdaEvents(null);
 
     try {
-      const response = await searchMedicine(searchQuery);
-      if (response.success) {
-        setSearchResult(response.data);
+      // Run AI summary (private) and OpenFDA (public) in parallel, but don't fail the whole view if one fails
+      const aiPromise = searchMedicine(searchQuery).catch((e) => e);
+      const fdaDetailsPromise = fetchOpenFdaDetails(searchQuery).catch((e) => e);
+      const fdaEventsPromise = fetchOpenFdaEvents(searchQuery).catch((e) => e);
+
+      const [aiRes, fdaDetRes, fdaEvtRes] = await Promise.all([aiPromise, fdaDetailsPromise, fdaEventsPromise]);
+
+      if (aiRes?.success) {
+        setSearchResult(aiRes.data);
+      }
+      if (fdaDetRes?.success) {
+        setFdaDetails(fdaDetRes.data);
+      }
+      if (fdaEvtRes?.success) {
+        setFdaEvents(fdaEvtRes.data);
+      }
+
+      if (!aiRes?.success && !fdaDetRes?.success) {
+        // If both sources failed, surface a friendly error
+        const msg = aiRes?.message || fdaDetRes?.message || 'No results available';
+        setError(typeof msg === 'string' ? msg : 'No results available');
       }
     } catch (err) {
       setError(err.message || 'Failed to search medicine');
@@ -136,7 +160,7 @@ const MedicineSearch = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="relative bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-linear-to-br from-pink-50 via-purple-50 to-blue-50 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -224,7 +248,7 @@ const MedicineSearch = ({ onClose }) => {
                   <button
                     key={idx}
                     onClick={() => setSearchQuery(category.examples[0])}
-                    className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg hover:shadow-lg transition-all text-left"
+                    className="p-4 bg-linear-to-br from-purple-50 to-pink-50 rounded-lg hover:shadow-lg transition-all text-left"
                   >
                     <div className="text-3xl mb-2">{category.icon}</div>
                     <div className="font-semibold text-gray-800">
@@ -264,31 +288,113 @@ const MedicineSearch = ({ onClose }) => {
             </div>
 
             {/* Search Results */}
-            {searchResult && (
+              {(searchResult || fdaDetails) && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-2xl font-bold text-purple-800 mb-4">
-                  Results for: {searchResult.searchTerm}
-                </h3>
-                <div className="prose max-w-none">
-                  <div
-                    className="text-gray-700 whitespace-pre-wrap"
-                    dangerouslySetInnerHTML={{
-                      __html: searchResult.information.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    }}
-                  />
-                </div>
-                {searchResult.suggestions && searchResult.suggestions.length > 0 && (
-                  <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold text-blue-800 mb-2">
-                      Related Suggestions:
-                    </h4>
-                    <ul className="list-disc list-inside text-blue-700">
-                      {searchResult.suggestions.map((suggestion, idx) => (
-                        <li key={idx}>{suggestion}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  {searchResult && (
+                    <>
+                      <h3 className="text-2xl font-bold text-purple-800 mb-4">
+                        AI Summary for: {searchResult.searchTerm}
+                      </h3>
+                      <div className="prose max-w-none">
+                        <div
+                          className="text-gray-700 whitespace-pre-wrap"
+                          dangerouslySetInnerHTML={{
+                            __html: searchResult.information.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          }}
+                        />
+                      </div>
+                      {searchResult.suggestions && searchResult.suggestions.length > 0 && (
+                        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                          <h4 className="font-semibold text-blue-800 mb-2">
+                            Related Suggestions:
+                          </h4>
+                          <ul className="list-disc list-inside text-blue-700">
+                            {searchResult.suggestions.map((suggestion, idx) => (
+                              <li key={idx}>{suggestion}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      <hr className="my-6" />
+                    </>
+                  )}
+
+                  {fdaDetails && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-green-600 text-xl">✔</span>
+                        <h3 className="text-2xl font-bold text-green-800">
+                          Verified FDA Data
+                        </h3>
+                      </div>
+                      {(fdaDetails.names?.brand?.length || fdaDetails.names?.generic?.length) && (
+                        <p className="text-gray-700 mb-2">
+                          <span className="font-semibold">Names:</span> {[...(fdaDetails.names.brand || []), ...(fdaDetails.names.generic || [])].join(', ')}
+                        </p>
+                      )}
+                      {fdaDetails.label?.indications_and_usage && (
+                        <div className="mb-4">
+                          <h4 className="font-semibold text-gray-800">Uses</h4>
+                          <p className="text-gray-700 whitespace-pre-wrap">{fdaDetails.label.indications_and_usage}</p>
+                        </div>
+                      )}
+                      {fdaDetails.label?.dosage_and_administration && (
+                        <div className="mb-4">
+                          <h4 className="font-semibold text-gray-800">Dosage & Administration</h4>
+                          <p className="text-gray-700 whitespace-pre-wrap">{fdaDetails.label.dosage_and_administration}</p>
+                        </div>
+                      )}
+                      {(fdaDetails.composition?.activeIngredients?.length || fdaDetails.composition?.activeIngredientLabel) && (
+                        <div className="mb-4">
+                          <h4 className="font-semibold text-gray-800">Ingredients</h4>
+                          {fdaDetails.composition.activeIngredients?.length > 0 ? (
+                            <ul className="list-disc list-inside text-gray-700">
+                              {fdaDetails.composition.activeIngredients.map((ing, i) => (
+                                <li key={i}>{ing.name} {ing.strength ? `- ${ing.strength}` : ''}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-gray-700">{fdaDetails.composition.activeIngredientLabel}</p>
+                          )}
+                        </div>
+                      )}
+                      {fdaDetails.label?.warnings && (
+                        <div className="mb-2 p-3 bg-red-50 border border-red-200 rounded">
+                          <h4 className="font-semibold text-red-800">Warnings</h4>
+                          <p className="text-red-700 whitespace-pre-wrap">{fdaDetails.label.warnings}</p>
+                        </div>
+                      )}
+                      <div className="mt-4 text-xs text-gray-500">Source: OpenFDA (or fallback demo)</div>
+                    </div>
+                  )}
+
+                  {fdaEvents && (
+                    <div className="mt-6">
+                      <h4 className="font-semibold text-gray-800 mb-2">Adverse Events (OpenFDA)</h4>
+                      {fdaEvents.reactions?.length > 0 && (
+                        <div className="mb-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                            {fdaEvents.reactions.slice(0, 9).map((r, idx) => (
+                              <div key={idx} className="flex items-center justify-between bg-gray-50 rounded px-3 py-2 text-sm">
+                                <span className="text-gray-700">{r.term}</span>
+                                <span className="text-gray-500">{r.count}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {fdaEvents.recent?.length > 0 && (
+                        <div className="text-xs text-gray-600">
+                          <div className="font-semibold mb-1">Recent Reports:</div>
+                          <ul className="list-disc list-inside">
+                            {fdaEvents.recent.slice(0, 5).map((e, idx) => (
+                              <li key={idx}>{e.received}: {e.reactions?.join(', ')}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
               </div>
             )}
           </div>

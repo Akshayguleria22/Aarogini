@@ -4,6 +4,7 @@ const { protect } = require('../middleware/auth');
 const MedicalReport = require('../models/MedicalReport');
 const User = require('../models/User');
 const PeriodTracker = require('../models/PeriodTracker');
+const { getWomenHealthGuidelines } = require('../services/whoService');
 
 // Women's health conditions to track (21 conditions as per requirement)
 const HEALTH_CONDITIONS = [
@@ -49,29 +50,175 @@ router.get('/dashboard', protect, async (req, res) => {
       .limit(6)
       .lean();
 
-    // Analyze health status for each condition
-    const conditionsStatus = HEALTH_CONDITIONS.map(condition => {
-      const isDetected = (user.detectedConditions || []).some(c =>
-        c.toLowerCase().includes(condition.toLowerCase()) ||
-        condition.toLowerCase().includes(c.toLowerCase())
-      );
+    // Helpers
+    const pickTest = (tests = [], nameIncludes) => {
+      const idx = tests.findIndex(t => (t.test_name || '').toLowerCase().includes(nameIncludes));
+      return idx === -1 ? null : tests[idx];
+    };
 
-      // Find related reports
-      const relatedReports = reports.filter(r =>
+    const parseBoolPositive = (val) => {
+      if (val === true) return true;
+      const s = String(val).toLowerCase();
+      return ['1', 'true', 'yes', 'positive', 'pcos', 'high'].some(x => s.includes(x));
+    };
+
+    const latestRelatedReports = (condition) => (
+      reports.filter(r =>
         (r.analysis?.detected_conditions || []).some(dc =>
           dc.toLowerCase().includes(condition.toLowerCase()) ||
           condition.toLowerCase().includes(dc.toLowerCase())
         )
+      )
+    );
+
+    const buildCard = async (condition) => {
+      const detectedFromUser = (user.detectedConditions || []).some(c =>
+        c.toLowerCase().includes(condition.toLowerCase()) ||
+        condition.toLowerCase().includes(c.toLowerCase())
       );
+
+      const relatedReports = latestRelatedReports(condition);
+      const latest = relatedReports[0] || reports[0]; // fallback to most recent report overall
+      const tests = latest?.analysis?.tests || [];
+
+      let detected = detectedFromUser;
+      let severity = latest?.analysis?.abnormal_findings?.[0]?.severity || null;
+      let currentHealth = 'No recent data';
+      let aiRecommendations = [];
+
+      // Condition-specific derivations using mlPredictions and key tests
+      const preds = latest?.mlPredictions || [];
+      const findPred = (key) => preds.find(p => p.model === key);
+
+      const lc = condition.toLowerCase();
+      if (lc.includes('pcos')) {
+        const p = findPred('pcos');
+        if (p) {
+          const pos = parseBoolPositive(p.prediction);
+          detected = detected || pos;
+          severity = pos ? 'moderate' : 'mild';
+          currentHealth = pos ? 'PCOS indicators present' : 'No strong PCOS indicators';
+          aiRecommendations = pos ? [
+            'Consult a gynecologist/endocrinologist for confirmation',
+            'Adopt a balanced, low-glycemic diet and regular exercise',
+            'Track menstrual cycles and symptoms'
+          ] : ['Maintain healthy lifestyle; re-evaluate if symptoms change'];
+        }
+      } else if (lc.includes('pregnancy') || lc.includes('maternal')) {
+        const p = findPred('maternal_health_risk');
+        if (p) {
+          const lvl = String(p.prediction || '').toLowerCase();
+          detected = detected || lvl.length > 0;
+          if (lvl.includes('high')) severity = 'severe';
+          else if (lvl.includes('mid') || lvl.includes('moderate')) severity = 'moderate';
+          else if (lvl.includes('low')) severity = 'mild';
+          currentHealth = `Maternal risk: ${p.prediction}`;
+          aiRecommendations = [
+            'Schedule antenatal check-ups regularly',
+            'Monitor blood pressure, glucose, and heart rate',
+            'Follow WHO antenatal care recommendations'
+          ];
+        }
+      } else if (lc.includes('diabetes')) {
+        const gl = pickTest(tests, 'glucose') || pickTest(tests, 'blood sugar') || pickTest(tests, 'bs');
+        if (gl) {
+          detected = detected || true;
+          const val = parseFloat(gl.value);
+          if (Number.isFinite(val)) {
+            if (val >= 200) { severity = 'severe'; currentHealth = `High glucose: ${gl.value} ${gl.unit || ''}`.trim(); }
+            else if (val >= 140) { severity = 'moderate'; currentHealth = `Elevated glucose: ${gl.value} ${gl.unit || ''}`.trim(); }
+            else { severity = severity || 'mild'; currentHealth = `Glucose: ${gl.value} ${gl.unit || ''}`.trim(); }
+          }
+          aiRecommendations = [
+            'Reduce refined carbs and added sugars',
+            'Increase physical activity and hydration',
+            'Consult a clinician for HbA1c testing if persistently high'
+          ];
+        }
+      } else if (lc.includes('anemia')) {
+        const hb = pickTest(tests, 'hemoglobin') || pickTest(tests, 'haemoglobin');
+        if (hb) {
+          detected = detected || true;
+          const val = parseFloat(hb.value);
+          if (Number.isFinite(val)) {
+            if (val < 8) { severity = 'severe'; currentHealth = `Severely low Hb: ${hb.value} ${hb.unit || ''}`.trim(); }
+            else if (val < 12) { severity = 'moderate'; currentHealth = `Low Hb: ${hb.value} ${hb.unit || ''}`.trim(); }
+            else { severity = severity || 'mild'; currentHealth = `Hb: ${hb.value} ${hb.unit || ''}`.trim(); }
+          }
+          aiRecommendations = [
+            'Increase iron-rich foods (leafy greens, legumes)',
+            'Consider iron and folic acid after consulting a doctor',
+            'Recheck hemoglobin in 4–6 weeks'
+          ];
+        }
+      } else if (lc.includes('thyroid')) {
+        const tsh = pickTest(tests, 'tsh');
+        if (tsh) {
+          detected = detected || true;
+          const val = parseFloat(tsh.value);
+          if (Number.isFinite(val)) {
+            if (val > 10) { severity = 'severe'; currentHealth = `High TSH: ${tsh.value} ${tsh.unit || ''}`.trim(); }
+            else if (val > 4.5) { severity = 'moderate'; currentHealth = `Elevated TSH: ${tsh.value} ${tsh.unit || ''}`.trim(); }
+            else if (val < 0.3) { severity = 'moderate'; currentHealth = `Low TSH: ${tsh.value} ${tsh.unit || ''}`.trim(); }
+            else { severity = severity || 'mild'; currentHealth = `TSH: ${tsh.value} ${tsh.unit || ''}`.trim(); }
+          }
+          aiRecommendations = [
+            'Discuss thyroid function with your physician',
+            'Adhere to medication if prescribed; avoid sudden dose changes',
+            'Re-test TSH/T3/T4 as advised'
+          ];
+        }
+      } else if (lc.includes('cervical cancer')) {
+        // Rely on detected conditions; predictions unlikely
+        if (detectedFromUser || relatedReports.length > 0) {
+          detected = true;
+          severity = severity || 'moderate';
+          currentHealth = 'Cervical health monitoring recommended';
+          aiRecommendations = [
+            'Ensure regular Pap smear/HPV screening as per age guidelines',
+            'Discuss vaccination and follow-up schedule with your gynecologist'
+          ];
+        }
+      } else {
+        // Fallback generic
+        if (relatedReports.length > 0) {
+          detected = true;
+          currentHealth = latest?.analysis?.summary || 'Review recent report analysis';
+        }
+      }
+
+      // Map severity to a simplified status
+      const status = severity === 'severe' ? 'attention' : (severity === 'moderate' ? 'monitor' : (detected ? 'ok' : 'unknown'));
+
+      // WHO guideline snippet (best effort)
+      let who = null;
+      try {
+        const g = await getWomenHealthGuidelines(condition);
+        if (g?.success && g.data) {
+          who = { title: g.data.title, count: (g.data.recommendations || []).length, source: g.data.source };
+        }
+      } catch (_) { /* ignore WHO errors */ }
 
       return {
         condition,
-        detected: isDetected,
+        detected,
         reportsCount: relatedReports.length,
         lastReportDate: relatedReports[0]?.uploadDate || null,
-        severity: relatedReports[0]?.analysis?.abnormal_findings?.[0]?.severity || null,
+        severity,
+        status,
+        currentHealth,
+        aiRecommendations,
+        whoGuidelines: who,
       };
-    });
+    };
+
+    // Analyze health status for each condition
+    const conditionsStatus = [];
+    for (const condition of HEALTH_CONDITIONS) {
+      // eslint-disable-next-line no-await-in-loop
+      const card = await buildCard(condition);
+      conditionsStatus.push(card);
+    }
 
     // Get recent abnormal findings
     const recentAbnormalities = reports

@@ -103,6 +103,13 @@ const medicalReportSchema = new mongoose.Schema({
     source: String,
     note: String,
   }],
+  // Stored ML predictions from trained models
+  mlPredictions: [{
+    model: String,
+    prediction: mongoose.Schema.Types.Mixed,
+    proba: mongoose.Schema.Types.Mixed,
+    features: mongoose.Schema.Types.Mixed,
+  }],
   testResults: [{
     testName: String,
     value: String,

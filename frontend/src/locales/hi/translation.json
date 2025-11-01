@@ -1,0 +1,26 @@
+{
+  "app": {
+    "title": "आरोगिनी",
+    "subtitle": "आपका व्यक्तिगत स्वास्थ्य साथी"
+  },
+  "nav": {
+    "home": "मुख्य पृष्ठ",
+    "reports": "रिपोर्ट्स",
+    "medicine": "दवाइयाँ",
+    "tracker": "ट्रैकर",
+    "profile": "प्रोफ़ाइल"
+  },
+  "actions": {
+    "login": "लॉगिन",
+    "signup": "साइन अप",
+    "logout": "लॉगआउट",
+    "download": "डाउनलोड",
+    "delete": "हटाएँ"
+  },
+  "language": {
+    "label": "भाषा",
+    "english": "अंग्रेज़ी",
+    "hindi": "हिंदी",
+    "punjabi": "पंजाबी"
+  }
+}

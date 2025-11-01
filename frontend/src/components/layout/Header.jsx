@@ -5,12 +5,14 @@ import MenuIcon from '../icons/MenuIcon'
 import UserIcon from '../icons/UserIcon'
 import MenuPanel from './MenuPanel'
 import ProfilePanel from './ProfilePanel'
+import { useTranslation } from 'react-i18next'
 
 const Header = () => {
   const location = useLocation()
   const { user, isAuthenticated } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const { i18n, t } = useTranslation()
 
   // Don't show header on login/signup pages
   if (location.pathname === '/login' || location.pathname === '/signup') {
@@ -24,7 +26,7 @@ const Header = () => {
         <Link to="/" className="relative group cursor-pointer">
           <div className="absolute -inset-3 bg-linear-to-r from-purple-300 to-pink-200 rounded-full blur-lg opacity-30 group-hover:opacity-50 animate-spin-slow transition-opacity duration-500"></div>
           <img 
-            src="/logooo.png" 
+            src="/logo.png" 
             alt="Aarogini Logo" 
             className="size-23 w-27 relative z-10"
           />
@@ -32,6 +34,19 @@ const Header = () => {
 
         {/* Right icons */}
         <div className="flex items-center space-x-4">
+          {/* Language Switcher */}
+          <div className="hidden sm:block">
+            <select
+              aria-label="Language"
+              className="text-xs px-2 py-1 bg-white/70 backdrop-blur-sm border border-white/40 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+              value={(i18n.language || 'en').split('-')[0]}
+              onChange={(e) => i18n.changeLanguage(e.target.value)}
+            >
+              <option value="en">EN</option>
+              <option value="hi">हिं</option>
+              <option value="pa">ਪੰ</option>
+            </select>
+          </div>
           {isAuthenticated ? (
             <>
               {/* User Info */}
@@ -54,14 +69,14 @@ const Header = () => {
               {/* Login Button */}
               <Link to="/login">
                 <button className="px-6 py-2 text-purple-600 font-semibold hover:text-purple-700 transition-colors duration-200">
-                  Login
+                    {t('actions.login')}
                 </button>
               </Link>
 
               {/* Sign Up Button */}
               <Link to="/signup">
                 <button className="px-6 py-2 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                  Sign Up
+                    {t('actions.signup')}
                 </button>
               </Link>
             </>

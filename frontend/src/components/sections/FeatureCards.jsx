@@ -1,12 +1,11 @@
 import React from 'react'
-import { CalendarIcon, MedicineIcon, ChartIcon, ChatIcon } from '../icons/FeatureIcons'
 
 const FeatureCards = ({ activeFeature, setActiveFeature }) => {
   const mainFeatures = [
-    { icon: CalendarIcon, name: "PERIOD TRACKER", color: "from-pink-400 to-purple-400" },
-    { icon: MedicineIcon, name: "MEDICINE SEARCH", color: "from-purple-400 to-purple-500" },
-    { icon: ChartIcon, name: "REPORT RECORD", color: "from-purple-500 to-indigo-500" },
-    { icon: ChatIcon, name: "CHAT VEDA (AI CHATBOT)", color: "from-indigo-400 to-purple-400" },
+    { img: '/blood.jpg', name: 'PERIOD TRACKER', color: 'from-pink-400 to-purple-400' },
+    { img: '/medicine.jpg', name: 'MEDICINE SEARCH', color: 'from-purple-400 to-purple-500' },
+    { img: '/report.jpg', name: 'REPORT RECORD', color: 'from-purple-500 to-indigo-500' },
+    { img: '/chat.jpg', name: 'CHAT VEDA (AI CHATBOT)', color: 'from-indigo-400 to-purple-400' },
   ]
 
   return (
@@ -51,10 +50,13 @@ const FeatureCards = ({ activeFeature, setActiveFeature }) => {
             }
           }}
         >
-          <div className={`feature-icon mb-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${
-            activeFeature === index ? 'text-white' : 'text-purple-600'
+          <div className={`feature-icon mb-4 transition-all duration-300 group-hover:scale-110 ${activeFeature === index ? '' : ''
           }`}>
-            <feature.icon />
+            <img
+              src={feature.img}
+              alt={feature.name}
+              className="w-16 h-16 rounded-full object-cover shadow-md"
+            />
           </div>
           <p className={`feature-text text-xs font-semibold tracking-wider uppercase leading-tight text-center ${
             activeFeature === index ? 'text-white' : 'text-gray-700'

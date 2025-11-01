@@ -4,8 +4,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { protect } = require('../middleware/auth');
-const { analyzeReportFlow, chatFlow, compareReportsFlow } = require('../services/geminiClient');
+const { compareReportsFlow } = require('../services/geminiClient');
+const { qaAnswer, derivePredictionsFromAnalysis } = require('../services/modelService');
 const { extractText } = require('../services/reportExtractor');
+const { parseTestsFromText } = require('../services/parserService');
 const { getWomenHealthGuidelines } = require('../services/whoService');
 const MedicalReport = require('../models/MedicalReport');
 const User = require('../models/User');
@@ -27,135 +29,105 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
-  },
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   fileFilter: (req, file, cb) => {
-    // Allow PDF and image files
     const allowedTypes = /pdf|jpeg|jpg|png/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
-    
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Only PDF and image files (JPEG, JPG, PNG) are allowed!'));
-    }
+    if (mimetype && extname) return cb(null, true);
+    cb(new Error('Only PDF and image files (JPEG, JPG, PNG) are allowed!'));
   }
 });
 
 // @route   POST /api/ai/analyze-report
-// @desc    Upload and analyze medical report with Gemini AI (supports direct image analysis)
+// @desc    Upload and analyze medical report (local OCR + parser + ML models)
 // @access  Private
 router.post('/analyze-report', protect, upload.single('report'), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: 'No file uploaded'
-      });
-    }
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
 
     console.log('Analyzing report:', req.file.filename, 'for user:', req.user.id);
-
     const { reportName, reportType } = req.body;
     const fileExt = path.extname(req.file.originalname).toLowerCase();
     const isImage = ['.jpg', '.jpeg', '.png'].includes(fileExt);
 
-    let analysis;
-
-    // For images, use direct multimodal analysis with Gemini (faster and more accurate)
-    if (isImage) {
-      console.log('Using direct image analysis with Gemini...');
-      
-      try {
-        // Convert image to base64
-        const imageBuffer = fs.readFileSync(req.file.path);
-        const base64Image = imageBuffer.toString('base64');
-
-        // Analyze image directly with Gemini
-        analysis = await analyzeReportFlow({
-          imageData: base64Image,
-          reportType: reportType || 'general',
-        });
-
-        console.log('Direct image analysis completed');
-
-      } catch (err) {
-        if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-        console.error('Direct image analysis error:', err.message);
-        return res.status(500).json({ 
-          success: false, 
-          message: 'Failed to analyze image with AI', 
-          error: err.message 
-        });
+    // Extract text via OCR or PDF parser
+    let extractedText = '';
+    try {
+      extractedText = await extractText(req.file.path, fileExt);
+      if (!extractedText || extractedText.trim().length < 20) {
+        throw new Error('Insufficient text extracted from the report');
       }
-    } 
-    // For PDFs, extract text first then analyze
-    else if (fileExt === '.pdf') {
-      console.log('Extracting text from PDF...');
-      
-      let extractedText = '';
-      try {
-        extractedText = await extractText(req.file.path, fileExt);
-        
-        if (!extractedText || extractedText.trim().length < 50) {
-          fs.unlinkSync(req.file.path);
-          return res.status(400).json({ 
-            success: false, 
-            message: 'Could not extract sufficient text from PDF. Please ensure the file is readable.' 
-          });
-        }
-      } catch (err) {
-        if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-        console.error('PDF text extraction error:', err.message);
-        return res.status(500).json({ 
-          success: false, 
-          message: 'Failed to extract text from PDF', 
-          error: err.message 
-        });
-      }
-
-      // Analyze extracted text with Gemini AI
-      try {
-        analysis = await analyzeReportFlow({
-          reportText: extractedText,
-          reportType: reportType || 'general',
-        });
-      } catch (err) {
-        if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-        console.error('AI analysis error:', err.message);
-        return res.status(500).json({ 
-          success: false, 
-          message: 'AI analysis failed', 
-          error: err.message 
-        });
-      }
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Unsupported file type. Only PDF, JPG, and PNG are supported.'
-      });
+    } catch (err) {
+      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      console.error('Report text extraction error:', err.message);
+      return res.status(500).json({ success: false, message: 'Failed to extract text from report', error: err.message });
     }
 
-    // Get previous reports for comparison
+    // Parse tests and build local analysis
+    const parsed = parseTestsFromText(extractedText);
+    let analysis = {
+      patient_info: { name: null, age: null, gender: null, report_date: null },
+      tests: parsed.tests,
+      abnormal_findings: [],
+      health_concerns: [],
+      tracking_recommendations: [],
+      womens_health_indicators: [],
+      summary: 'Auto-generated report summary based on extracted values and model predictions.',
+      detected_conditions: [],
+    };
+
+    // Detect report type/category heuristically
+    const detectReportType = (text, tests) => {
+      const t = (text || '').toLowerCase();
+      const names = (tests || []).map(x => (x.test_name || '').toLowerCase());
+      const hasTest = (kw) => names.some(n => n.includes(kw));
+
+      if ((tests || []).length > 0) {
+        if (hasTest('tsh') || hasTest('t3') || hasTest('t4') || hasTest('testosterone')) return 'hormone_test';
+        return 'blood_test';
+      }
+      if (t.includes('urine')) return 'urine_test';
+      if (t.includes('stool')) return 'stool_test';
+      if (t.includes('ultrasound')) return 'ultrasound';
+      if (t.includes('x-ray') || t.includes('xray')) return 'x-ray';
+      if (t.includes('mri')) return 'mri';
+      if (t.includes('ct')) return 'ct_scan';
+      if (t.includes('prescription')) return 'prescription';
+      if (t.includes('diagnosis')) return 'diagnosis';
+      return 'general';
+    };
+    const detectedType = detectReportType(extractedText, parsed.tests);
+
+    // ML predictions based on parsed tests
+    let mlPredictions = [];
+    try {
+      mlPredictions = await derivePredictionsFromAnalysis({ tests: parsed.tests });
+      for (const p of mlPredictions) {
+        if (p.model === 'pcos' && (p.prediction === 1 || p.prediction === '1')) {
+          analysis.detected_conditions.push('PCOS');
+        }
+        if (p.model === 'maternal_health_risk') {
+          analysis.detected_conditions.push(`Maternal ${String(p.prediction)}`);
+        }
+      }
+    } catch (e) {
+      console.warn('ML prediction derivation failed:', e.message);
+    }
+
+    // Previous reports and comparison (optional)
     const previousReports = await MedicalReport.find({ user: req.user.id })
       .sort({ uploadDate: -1 })
       .limit(5)
       .lean();
 
-    // Compare with previous reports if available
     let comparison = null;
     if (previousReports.length > 0) {
       const reportsForComparison = previousReports.map(r => ({
         date: r.uploadDate.toISOString(),
         tests: r.analysis?.tests || [],
       }));
-      reportsForComparison.push({
-        date: new Date().toISOString(),
-        tests: analysis.tests,
-      });
-
+      reportsForComparison.push({ date: new Date().toISOString(), tests: analysis.tests });
       try {
         comparison = await compareReportsFlow({ reports: reportsForComparison });
       } catch (err) {
@@ -163,36 +135,34 @@ router.post('/analyze-report', protect, upload.single('report'), async (req, res
       }
     }
 
-    // Get WHO guidelines for detected conditions
+    // WHO guidelines for detected conditions
     const whoGuidelines = [];
     if (analysis.detected_conditions && analysis.detected_conditions.length > 0) {
       for (const condition of analysis.detected_conditions.slice(0, 3)) {
         const guideline = await getWomenHealthGuidelines(condition);
-        if (guideline.success) {
-          whoGuidelines.push(guideline.data);
-        }
+        if (guideline.success) whoGuidelines.push(guideline.data);
       }
     }
 
-    // Save to database
+    // Persist
     const reportDoc = new MedicalReport({
       user: req.user.id,
-      reportType: reportType || 'general',
+      reportType: reportType || detectedType || 'general',
       reportName: reportName || req.file.originalname,
       uploadDate: new Date(),
-      analysis: analysis,
-      comparison: comparison,
-      whoGuidelines: whoGuidelines,
+      analysis,
+      comparison,
+      whoGuidelines,
+      mlPredictions,
       filePath: req.file.path,
-      extractedText: isImage ? '[Image-based analysis]' : analysis.summary?.substring(0, 5000), // Store summary for images
+      extractedText: extractedText.substring(0, 5000),
     });
-
     await reportDoc.save();
 
-    // Update user's health tracking if conditions detected
+    // Update user profile with detected conditions
     if (analysis.detected_conditions && analysis.detected_conditions.length > 0) {
       await User.findByIdAndUpdate(req.user.id, {
-        $addToSet: { detectedConditions: { $each: analysis.detected_conditions } }
+        $addToSet: { detectedConditions: { $each: analysis.detected_conditions } },
       });
     }
 
@@ -203,22 +173,19 @@ router.post('/analyze-report', protect, upload.single('report'), async (req, res
         analysis,
         comparison,
         whoGuidelines,
+        mlPredictions,
         previousReportsCount: previousReports.length,
-        analysisMethod: isImage ? 'direct_image' : 'text_extraction',
-      }
+        analysisMethod: isImage ? 'ocr_image' : 'text_extraction',
+        extractedText: extractedText.substring(0, 5000),
+      },
     });
 
   } catch (error) {
-    // Clean up file if exists
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
-
     console.error('AI Report Analysis Error:', error.message);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Failed to analyze report'
-    });
+    res.status(500).json({ success: false, message: error.message || 'Failed to analyze report' });
   }
 });
 
@@ -227,52 +194,16 @@ router.post('/analyze-report', protect, upload.single('report'), async (req, res
 // @access  Private
 router.post('/chat', protect, async (req, res) => {
   try {
-    const { message, conversation_history } = req.body;
-
+    const { message } = req.body;
     if (!message || message.trim() === '') {
-      return res.status(400).json({
-        success: false,
-        message: 'Message is required'
-      });
+      return res.status(400).json({ success: false, message: 'Message is required' });
     }
-
-    // Get user context
-    const user = await User.findById(req.user.id).lean();
-    const recentReports = await MedicalReport.find({ user: req.user.id })
-      .sort({ uploadDate: -1 })
-      .limit(3)
-      .lean();
-
-    const userContext = `User has ${recentReports.length} medical reports. ${
-      user.detectedConditions && user.detectedConditions.length > 0
-        ? `Known conditions: ${user.detectedConditions.join(', ')}.`
-        : ''
-    }`;
-
-    // Build conversation history string
-    const historyText = Array.isArray(conversation_history)
-      ? conversation_history.map(m => `${m.role || 'user'}: ${m.content || m.message || ''}`).join('\n')
-      : '';
-
-    // Call Gemini AI
-    const response = await chatFlow({
-      message,
-      conversationHistory: historyText,
-      userContext,
-    });
-
-    res.status(200).json({
-      success: true,
-      data: response,
-    });
-
+    // Use trained QA model only
+    const answer = await qaAnswer(message);
+    res.status(200).json({ success: true, data: { response: answer } });
   } catch (error) {
-    console.error('AI Chat Error:', error.message);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get AI response',
-      error: error.message,
-    });
+    console.error('AI Chat (ML) Error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to get response from trained model', error: error.message });
   }
 });
 

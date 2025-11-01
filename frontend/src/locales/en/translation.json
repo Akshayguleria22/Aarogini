@@ -1,0 +1,26 @@
+{
+  "app": {
+    "title": "Aarogini",
+    "subtitle": "Your personal health companion"
+  },
+  "nav": {
+    "home": "Home",
+    "reports": "Reports",
+    "medicine": "Medicine",
+    "tracker": "Tracker",
+    "profile": "Profile"
+  },
+  "actions": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "download": "Download",
+    "delete": "Delete"
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "hindi": "Hindi",
+    "punjabi": "Punjabi"
+  }
+}

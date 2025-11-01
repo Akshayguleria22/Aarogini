@@ -4,6 +4,7 @@
 - Node.js (v16 or higher)
 - MongoDB (local or MongoDB Atlas)
 - npm or yarn
+ - Python 3.10+ (for ML inference; set PYTHON_EXE in .env if needed)
 
 ## 📦 Installation Steps
 
@@ -44,6 +45,8 @@ MONGODB_URI=mongodb://localhost:27017/aarogini
 JWT_SECRET=aarogini_wellness_secret_key_2025
 JWT_EXPIRE=7d
 CLIENT_URL=http://localhost:5173
+# Optional: Path to Python executable for ML inference (defaults to 'python')
+PYTHON_EXE=C:\\Users\\<you>\\AppData\\Local\\Programs\\Python\\Python313\\python.exe
 ```
 
 ### 4. Start the Server
@@ -135,6 +138,7 @@ Server will run on: **http://localhost:5000**
 
 ### Chat Routes (`/api/chat`)
 - `POST /message` - Send message
+- Note: Chat uses the trained Q&A retriever first; falls back to Gemini/rule-based reply if unavailable
 - `GET /history/:sessionId` - Get chat history
 - `GET /sessions` - Get all sessions
 - `DELETE /session/:sessionId` - Delete session
@@ -247,3 +251,4 @@ backend/
 - JWT authentication is implemented
 - CORS is configured for frontend connection
 - Ready to integrate with React frontend!
+- ML integration: the API will look for trained models under `Aarogini/models` and use `Aarogini/inference.py`. Report analysis responses include `mlPredictions` when sufficient features are present (e.g., Maternal Health Risk). 

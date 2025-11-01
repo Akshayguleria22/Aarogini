@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ChatMessage = require('../models/ChatMessage');
 const { protect } = require('../middleware/auth');
-const { chatFlow } = require('../services/geminiClient');
+const { qaAnswer } = require('../services/modelService');
 const User = require('../models/User');
 const PeriodTracker = require('../models/PeriodTracker');
 const HealthJournal = require('../models/HealthJournal');
@@ -10,142 +10,84 @@ const Medicine = require('../models/Medicine');
 
 // Helper function to get user context
 const getUserContext = async (userId) => {
-  try {
-    const user = await User.findById(userId).select('name email healthProfile detectedConditions');
-    const periods = await PeriodTracker.find({ userId }).sort({ cycleStartDate: -1 }).limit(3).lean();
-    const journals = await HealthJournal.find({ userId }).sort({ date: -1 }).limit(5).lean();
-    const medicines = await Medicine.find({ userId, isActive: true }).lean();
+  const user = await User.findById(userId).select('name email healthProfile detectedConditions');
+  const periods = await PeriodTracker.find({ userId }).sort({ cycleStartDate: -1 }).limit(3).lean();
+  const journals = await HealthJournal.find({ userId }).sort({ date: -1 }).limit(5).lean();
+  const medicines = await Medicine.find({ userId, isActive: true }).lean();
 
-    let contextStr = '';
-    
-    if (user) {
-      contextStr += `User: ${user.name}\n`;
-      if (user.detectedConditions && user.detectedConditions.length > 0) {
-        contextStr += `Detected Health Conditions: ${user.detectedConditions.join(', ')}\n`;
-      }
+  let contextStr = '';
+  if (user) {
+    contextStr += `User: ${user.name}\n`;
+    if (user.detectedConditions && user.detectedConditions.length > 0) {
+      contextStr += `Detected Health Conditions: ${user.detectedConditions.join(', ')}\n`;
     }
-
-    if (periods && periods.length > 0) {
-      contextStr += '\nRecent Menstrual Cycles:\n';
-      periods.forEach((period, idx) => {
-        const date = new Date(period.cycleStartDate).toLocaleDateString();
-        contextStr += `- Cycle ${idx + 1}: Started ${date}, Length: ${period.cycleLength || 28} days`;
-        if (period.symptoms && period.symptoms.length > 0) {
-          contextStr += `, Symptoms: ${period.symptoms.join(', ')}`;
-        }
-        contextStr += '\n';
-      });
-    }
-
-    if (journals && journals.length > 0) {
-      contextStr += '\nRecent Health Journal Entries:\n';
-      journals.slice(0, 3).forEach((entry) => {
-        const date = new Date(entry.date).toLocaleDateString();
-        contextStr += `- ${date}: ${entry.entry.substring(0, 100)}${entry.entry.length > 100 ? '...' : ''}\n`;
-      });
-    }
-
-    if (medicines && medicines.length > 0) {
-      contextStr += '\nCurrent Medications:\n';
-      medicines.forEach((med) => {
-        contextStr += `- ${med.name}: ${med.dosage}, ${med.frequency}\n`;
-      });
-    }
-
-    if (!contextStr) {
-      return 'This is a new user with no health data logged yet. Guide them on how to get started with the platform features: Period Tracker, Health Journal, Medicine Tracker, and Report Analyzer.';
-    }
-
-    return contextStr;
-  } catch (error) {
-    console.error('Error fetching user context:', error);
-    return '';
   }
+
+  if (periods && periods.length > 0) {
+    contextStr += '\nRecent Menstrual Cycles:\n';
+    periods.forEach((period, idx) => {
+      const date = new Date(period.cycleStartDate).toLocaleDateString();
+      contextStr += `- Cycle ${idx + 1}: Started ${date}, Length: ${period.cycleLength || 28} days`;
+      if (period.symptoms && period.symptoms.length > 0) {
+        contextStr += `, Symptoms: ${period.symptoms.join(', ')}`;
+      }
+      contextStr += '\n';
+    });
+  }
+
+  if (journals && journals.length > 0) {
+    contextStr += '\nRecent Health Journal Entries:\n';
+    journals.slice(0, 3).forEach((entry) => {
+      const date = new Date(entry.date).toLocaleDateString();
+      contextStr += `- ${date}: ${entry.entry.substring(0, 100)}${entry.entry.length > 100 ? '...' : ''}\n`;
+    });
+  }
+
+  if (medicines && medicines.length > 0) {
+    contextStr += '\nCurrent Medications:\n';
+    medicines.forEach((med) => {
+      contextStr += `- ${med.name}: ${med.dosage}, ${med.frequency}\n`;
+    });
+  }
+
+  return contextStr;
 };
 
 // @route   POST /api/chat/message
-// @desc    Send a chat message with Gemini AI
+// @desc    Send a chat message and get response from trained QA retriever
 // @access  Private
 router.post('/message', protect, async (req, res) => {
   try {
     const { sessionId, text } = req.body;
-
-    if (!text || text.trim() === '') {
-      return res.status(400).json({
-        success: false,
-        message: 'Message text is required'
-      });
+    if (!sessionId || !text || text.trim() === '') {
+      return res.status(400).json({ success: false, message: 'sessionId and text are required' });
     }
 
     let chatSession = await ChatMessage.findOne({ user: req.user.id, sessionId });
-
     if (!chatSession) {
-      chatSession = await ChatMessage.create({
-        user: req.user.id,
-        sessionId,
-        messages: []
-      });
+      chatSession = await ChatMessage.create({ user: req.user.id, sessionId, messages: [] });
     }
-
-    // Prepare conversation history (BEFORE adding new message)
-    const conversationHistory = chatSession.messages
-      .slice(-10)
-      .map(msg => `${msg.sender === 'user' ? 'User' : 'Assistant'}: ${msg.text}`)
-      .join('\n');
 
     // Add user message
-    chatSession.messages.push({
-      sender: 'user',
-      text,
-      timestamp: new Date()
-    });
+    chatSession.messages.push({ sender: 'user', text, timestamp: new Date() });
 
+    // Use trained QA model only
+    let botText = '';
     try {
-      // Get user context
-      const userContext = await getUserContext(req.user.id);
-
-      // Call Gemini AI via chatFlow
-      console.log('Calling Gemini AI chatFlow...');
-      const aiResponse = await chatFlow({
-        message: text,
-        conversationHistory,
-        userContext
-      });
-
-      // Add AI response
-      chatSession.messages.push({
-        sender: 'bot',
-        text: aiResponse.response,
-        timestamp: new Date()
-      });
-
-      console.log('Gemini AI Response received successfully');
-
-    } catch (aiError) {
-      console.error('Gemini AI Error:', aiError.message);
-      
-      // Fallback to rule-based response if AI service fails
-      const fallbackResponse = generateBotResponse(text);
-      chatSession.messages.push({
-        sender: 'bot',
-        text: fallbackResponse + "\n\n_(Note: AI service is temporarily unavailable. This is a fallback response.)_",
-        timestamp: new Date()
-      });
+      botText = await qaAnswer(text);
+    } catch (mlErr) {
+      console.warn('QA model failed:', mlErr.message);
+      botText = generateBotResponse(text);
     }
 
+    chatSession.messages.push({ sender: 'bot', text: botText, timestamp: new Date() });
     chatSession.lastMessageAt = new Date();
     await chatSession.save();
 
-    res.status(200).json({
-      success: true,
-      data: chatSession.messages.slice(-2) // Return last 2 messages (user + bot)
-    });
+    res.status(200).json({ success: true, data: chatSession.messages.slice(-2) });
   } catch (error) {
     console.error('Chat message error:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -154,26 +96,20 @@ router.post('/message', protect, async (req, res) => {
 // @access  Private
 router.post('/insights', protect, async (req, res) => {
   try {
-    // Get user context
-    const userContext = await getUserContext(req.user.id);
-
-    // Call Gemini AI for insights
-    const response = await chatFlow({
-      message: "Generate personalized health insights and recommendations based on my health data. Provide 3-5 specific, actionable insights.",
-      userContext
-    });
-
-    res.status(200).json({
-      success: true,
-      data: response.response
-    });
+    const ctx = await getUserContext(req.user.id);
+    const tips = [];
+    if (ctx.includes('Detected Health Conditions')) tips.push('Review your detected conditions and follow the WHO guidelines we surface in the reports tab.');
+    if (ctx.includes('Recent Menstrual Cycles')) tips.push('Track cycle symptoms to identify patterns and discuss with your provider if needed.');
+    if (ctx.includes('Current Medications')) tips.push('Keep your medication list up to date and set reminders to maintain adherence.');
+    if (tips.length < 3) {
+      tips.push('Aim for 7–8 hours of sleep, balanced meals, and regular physical activity.');
+      tips.push('Schedule periodic health checkups and record results in the app to see trends.');
+      tips.push('Manage stress with brief daily mindfulness or breathing exercises.');
+    }
+    res.status(200).json({ success: true, data: tips.slice(0, 5).join('\n• ') });
   } catch (error) {
     console.error('Insights generation error:', error);
-    
-    res.status(500).json({
-      success: false,
-      message: 'Failed to generate insights. Please try again later.'
-    });
+    res.status(500).json({ success: false, message: 'Failed to generate insights. Please try again later.' });
   }
 });
 

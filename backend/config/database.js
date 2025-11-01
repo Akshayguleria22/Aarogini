@@ -2,13 +2,20 @@ const mongoose = require('mongoose');
 
 const connectDatabase = async () => {
   try {
+    // Allow running in a degraded mode (no DB) when MONGODB_URI is not provided
+    if (!process.env.MONGODB_URI) {
+      console.warn('⚠️  MONGODB_URI is not set. Running without database. Some features will be disabled.');
+      return;
+    }
+
     const conn = await mongoose.connect(process.env.MONGODB_URI);
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     console.log(`📊 Database Name: ${conn.connection.name}`);
   } catch (error) {
     console.error(`❌ Error connecting to MongoDB: ${error.message}`);
-    process.exit(1);
+    // Do not exit the process; continue to serve endpoints that don't require DB
+    console.warn('Continuing without database connection.');
   }
 };
 

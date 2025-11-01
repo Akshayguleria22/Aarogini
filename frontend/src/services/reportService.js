@@ -125,6 +125,37 @@ export const deleteReport = async (reportId) => {
   }
 };
 
+// Download report file
+export const downloadReport = async (reportId) => {
+  try {
+    const response = await axios.get(`${API_URL}/reports/${reportId}/download`, {
+      headers: { Authorization: getAuthToken() },
+      responseType: 'blob',
+    });
+
+    // Extract filename from headers if present
+    const disposition = response.headers['content-disposition'] || '';
+    let filename = 'report';
+    const match = disposition.match(/filename="?([^";]+)"?/i);
+    if (match && match[1]) filename = match[1];
+
+    // Create a download link
+    const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error downloading report:', error);
+    throw error.response?.data || { success: false, message: 'Failed to download report' };
+  }
+};
+
 // Get WHO guidelines
 export const getWHOGuidelines = async (topic) => {
   try {

@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const fs = require('fs');
 const MedicalReport = require('../models/MedicalReport');
 const { protect } = require('../middleware/auth');
 const { analyzeReportWithWHO } = require('../services/whoService');
@@ -93,6 +95,43 @@ router.get('/:id', protect, async (req, res) => {
       success: false,
       message: error.message
     });
+  }
+});
+
+// @route   GET /api/reports/:id/download
+// @desc    Download original uploaded file for a report
+// @access  Private
+router.get('/:id/download', protect, async (req, res) => {
+  try {
+    const report = await MedicalReport.findById(req.params.id);
+
+    if (!report) {
+      return res.status(404).json({ success: false, message: 'Report not found' });
+    }
+
+    if (report.user.toString() !== req.user.id) {
+      return res.status(401).json({ success: false, message: 'Not authorized' });
+    }
+
+    if (!report.filePath) {
+      return res.status(404).json({ success: false, message: 'No file associated with this report' });
+    }
+
+    const absolutePath = path.isAbsolute(report.filePath)
+      ? report.filePath
+      : path.join(__dirname, '..', report.filePath);
+
+    if (!fs.existsSync(absolutePath)) {
+      return res.status(404).json({ success: false, message: 'File not found on server' });
+    }
+
+    const filename = report.fileName || path.basename(absolutePath);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/octet-stream');
+    const stream = fs.createReadStream(absolutePath);
+    stream.pipe(res);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 

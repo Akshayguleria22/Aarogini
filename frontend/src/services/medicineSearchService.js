@@ -75,9 +75,35 @@ export const getMedicineCategories = async () => {
   }
 };
 
+// Fetch verified medicine details from OpenFDA
+export const fetchOpenFdaDetails = async (query) => {
+  try {
+    const response = await axios.get(`${API_URL}/medicine-search/openfda`, {
+      params: { q: query }
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to fetch OpenFDA details' };
+  }
+};
+
+// Fetch OpenFDA adverse events (top reactions + recent cases)
+export const fetchOpenFdaEvents = async (query) => {
+  try {
+    const response = await axios.get(`${API_URL}/medicine-search/openfda/events`, {
+      params: { q: query }
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to fetch OpenFDA events' };
+  }
+};
+
 export default {
   searchMedicine,
   compareMedicines,
   checkInteractions,
-  getMedicineCategories
+  getMedicineCategories,
+  fetchOpenFdaDetails,
+  fetchOpenFdaEvents,
 };

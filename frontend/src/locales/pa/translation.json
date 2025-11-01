@@ -1,0 +1,26 @@
+{
+  "app": {
+    "title": "ਆਰੋਗਿਨੀ",
+    "subtitle": "ਤੁਹਾਡਾ ਨਿੱਜੀ ਸਿਹਤ ਸਾਥੀ"
+  },
+  "nav": {
+    "home": "ਮੁੱਖ",
+    "reports": "ਰਿਪੋਰਟਾਂ",
+    "medicine": "ਦਵਾਈ",
+    "tracker": "ਟ੍ਰੈਕਰ",
+    "profile": "ਪ੍ਰੋਫ਼ਾਈਲ"
+  },
+  "actions": {
+    "login": "ਲਾਗਇਨ",
+    "signup": "ਸਾਇਨ ਅਪ",
+    "logout": "ਲਾੱਗ ਆਊਟ",
+    "download": "ਡਾਊਨਲੋਡ",
+    "delete": "ਹਟਾਓ"
+  },
+  "language": {
+    "label": "ਭਾਸ਼ਾ",
+    "english": "ਅੰਗਰੇਜ਼ੀ",
+    "hindi": "ਹਿੰਦੀ",
+    "punjabi": "ਪੰਜਾਬੀ"
+  }
+}

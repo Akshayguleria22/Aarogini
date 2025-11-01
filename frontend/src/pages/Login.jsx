@@ -64,12 +64,8 @@ const Login = () => {
 
       <div className="relative w-full max-w-md">
         {/* Logo and Brand */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent mb-2">
-              Aarogini
-            </h1>
-          </Link>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <img src="/logo.png" alt="logo" style={{ width: '100px', height: '100px' }} />
           <p className="text-gray-600 text-lg">Welcome back! Please login to continue.</p>
         </div>
 
