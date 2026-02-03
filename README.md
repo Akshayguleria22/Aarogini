@@ -1,14 +1,19 @@
 # Aarogini
 
 <div align="center">
-  <img src="frontend/public/logo without bg.png" alt="Aarogini" width="180" />
+  <img src="./frontend/public/logooo.png" alt="Aarogini" width="180" />
   <p><strong>Women’s Health & Wellness Platform</strong></p>
   <p>Personalized tracking, curated guidance, and AI-assisted insights for holistic care.</p>
   <p>
     <a href="https://reactjs.org/">React</a> ·
     <a href="https://vitejs.dev/">Vite</a> ·
     <a href="https://tailwindcss.com/">Tailwind CSS</a> ·
-    <a href="https://nodejs.org/">Node.js</a>
+    <a href="https://nodejs.org/">Node.js</a> ·
+    <a href="https://expressjs.com/">Express</a> ·
+    <a href="https://www.mongodb.com/">MongoDB</a> ·
+    <a href="https://fastapi.tiangolo.com/">FastAPI</a> ·
+    <a href="https://www.python.org/">Python</a> ·
+    <a href="https://www.groq.com/">LLM</a>
   </p>
 </div>
 
@@ -317,5 +322,5 @@ For questions, suggestions, or collaboration opportunities:
 
 <div align="center">
   <p>Made with 💜 for women's health and wellness</p>
-  <p>© 2024-2025 Aarogini. All rights reserved.</p>
+  <p>© 2026 Aarogini. All rights reserved.</p>
 </div>
