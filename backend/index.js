@@ -30,6 +30,8 @@ app.use(cors({
     origin: [
         'http://localhost:5173',
         'http://localhost:5174',
+        'https://aarogini.vercel.app',
+        'https://aarogini.onrender.com',
         process.env.CLIENT_URL
     ].filter(Boolean),
     credentials: true
