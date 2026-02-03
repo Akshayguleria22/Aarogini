@@ -74,6 +74,8 @@ const ReportAnalyzer = ({ onClose }) => {
               status: (t.status || 'unknown').toLowerCase()
             }
           })
+          const aiInsights = doc.aiInsights || null
+          const aiRecommendations = (aiInsights?.recommendations || []).map((r) => r.action || r)
           return {
             id: doc._id,
             name: doc.reportName || 'Medical Report',
@@ -81,14 +83,15 @@ const ReportAnalyzer = ({ onClose }) => {
             type: doc.reportType || 'General',
             status: 'reviewed',
             findings,
-            recommendations: doc.analysis?.tracking_recommendations || [],
-            rawData: { analysis: doc.analysis, comparison: doc.comparison, whoGuidelines: doc.whoGuidelines, extractedText: doc.extractedText },
+            recommendations: aiRecommendations.length ? aiRecommendations : (doc.analysis?.tracking_recommendations || []),
+            rawData: { analysis: doc.analysis, comparison: doc.comparison, whoGuidelines: doc.whoGuidelines, extractedText: doc.extractedText, aiInsights },
             abnormalFindings: doc.analysis?.abnormal_findings || [],
             healthConcerns: doc.analysis?.health_concerns || [],
             whoComparison: null,
             periodCorrelation: null,
             comparison: doc.comparison || null,
             mlPredictions: doc.mlPredictions || [],
+            aiInsights,
           }
         })
         setReports(mapped)
@@ -193,6 +196,8 @@ const ReportAnalyzer = ({ onClose }) => {
     const analysis = apiData.analysis || {}
     const tests = analysis.tests || []
     const mlPreds = apiData.mlPredictions || []
+    const aiInsights = apiData.aiInsights || null
+    const aiRecommendations = (aiInsights?.recommendations || []).map((r) => r.action || r)
     
     // Transform tests array into findings object
     const findings = {}
@@ -214,17 +219,18 @@ const ReportAnalyzer = ({ onClose }) => {
       type: (apiData.reportType || 'General').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
       status: 'reviewed',
       findings: findings,
-      recommendations: [
+      recommendations: aiRecommendations.length ? aiRecommendations : [
         ...(analysis.tracking_recommendations || []),
         ...(apiData.who_insights?.recommendations || [])
       ],
-      rawData: apiData, // Store full API response
+      rawData: { ...apiData, aiInsights }, // Store full API response
       abnormalFindings: analysis.abnormal_findings || [],
       healthConcerns: analysis.health_concerns || [],
       whoComparison: apiData.who_comparison || null,
       periodCorrelation: apiData.period_correlation || null,
       comparison: apiData.comparison || null,
       mlPredictions: mlPreds,
+      aiInsights,
     }
   }
 
@@ -649,6 +655,40 @@ const ReportAnalyzer = ({ onClose }) => {
                 ) : null
               ))}
             </div>
+          </div>
+        )}
+
+        {/* AI Insights (Groq) */}
+        {selectedReport.aiInsights && (
+          <div className="bg-white rounded-xl p-5 border border-gray-200">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-bold text-gray-800">AI Insights</h4>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="px-2 py-1 rounded-full bg-zinc-100 text-zinc-700">
+                  Risk: {selectedReport.aiInsights.riskScore ?? 0}/100
+                </span>
+                <span className={`px-2 py-1 rounded-full ${selectedReport.aiInsights.urgencyLevel === 'critical' ? 'bg-red-100 text-red-700' :
+                    selectedReport.aiInsights.urgencyLevel === 'high' ? 'bg-orange-100 text-orange-700' :
+                      selectedReport.aiInsights.urgencyLevel === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-green-100 text-green-700'
+                  }`}>
+                  {selectedReport.aiInsights.urgencyLevel || 'low'} urgency
+                </span>
+              </div>
+            </div>
+            {selectedReport.aiInsights.summary && (
+              <p className="text-sm text-gray-700 mb-3">{selectedReport.aiInsights.summary}</p>
+            )}
+            {Array.isArray(selectedReport.aiInsights.recommendations) && selectedReport.aiInsights.recommendations.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-gray-600">Recommendations</p>
+                <ul className="list-disc list-inside text-sm text-gray-700">
+                  {selectedReport.aiInsights.recommendations.slice(0, 6).map((rec, idx) => (
+                    <li key={`ai-rec-${idx}`}>{rec.action || rec}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
 

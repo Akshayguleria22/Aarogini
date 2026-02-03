@@ -1,16 +1,19 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const { protect } = require('../middleware/auth');
-const { compareReportsFlow } = require('../services/geminiClient');
-const { qaAnswer, derivePredictionsFromAnalysis } = require('../services/modelService');
-const { extractText } = require('../services/reportExtractor');
-const { parseTestsFromText } = require('../services/parserService');
-const { getWomenHealthGuidelines } = require('../services/whoService');
-const MedicalReport = require('../models/MedicalReport');
-const User = require('../models/User');
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+import { protect } from '../middleware/auth.js';
+import { compareReportsFlow, analyzeWithGroq } from '../services/groqClient.js';
+import { derivePredictionsFromAnalysis } from '../services/modelService.js';
+import { extractText } from '../services/reportExtractor.js';
+import { parseTestsFromText } from '../services/parserService.js';
+import { getWomenHealthGuidelines } from '../services/whoService.js';
+import MedicalReport from '../models/MedicalReport.js';
+import User from '../models/User.js';
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -66,9 +69,19 @@ router.post('/analyze-report', protect, upload.single('report'), async (req, res
 
     // Parse tests and build local analysis
     const parsed = parseTestsFromText(extractedText);
+    const normalizeStatus = (s) => {
+      const v = String(s || '').toUpperCase();
+      if (['NORMAL', 'HIGH', 'LOW', 'ABNORMAL'].includes(v)) return v;
+      if (v === 'H') return 'HIGH';
+      if (v === 'L') return 'LOW';
+      return 'NORMAL';
+    };
     let analysis = {
       patient_info: { name: null, age: null, gender: null, report_date: null },
-      tests: parsed.tests,
+      tests: (parsed.tests || []).map((t) => ({
+        ...t,
+        status: normalizeStatus(t.status)
+      })),
       abnormal_findings: [],
       health_concerns: [],
       tracking_recommendations: [],
@@ -144,6 +157,32 @@ router.post('/analyze-report', protect, upload.single('report'), async (req, res
       }
     }
 
+    // Groq AI insights (structured recommendations)
+    let aiInsights = null;
+    try {
+      const userProfile = await User.findById(req.user.id)
+        .select('name email dateOfBirth healthProfile detectedConditions')
+        .lean();
+      aiInsights = await analyzeWithGroq({
+        profile: userProfile || {},
+        report: analysis,
+        ml: mlPredictions,
+        comparison: comparison || null
+      });
+
+      if (aiInsights?.summary) {
+        analysis.summary = aiInsights.summary;
+      }
+      if (Array.isArray(aiInsights?.healthUpdates?.detectedConditions) && aiInsights.healthUpdates.detectedConditions.length > 0) {
+        analysis.detected_conditions = Array.from(new Set([
+          ...(analysis.detected_conditions || []),
+          ...aiInsights.healthUpdates.detectedConditions
+        ]));
+      }
+    } catch (e) {
+      console.warn('Groq insights error:', e.message);
+    }
+
     // Persist
     const reportDoc = new MedicalReport({
       user: req.user.id,
@@ -154,6 +193,7 @@ router.post('/analyze-report', protect, upload.single('report'), async (req, res
       comparison,
       whoGuidelines,
       mlPredictions,
+      aiInsights,
       filePath: req.file.path,
       extractedText: extractedText.substring(0, 5000),
     });
@@ -174,6 +214,7 @@ router.post('/analyze-report', protect, upload.single('report'), async (req, res
         comparison,
         whoGuidelines,
         mlPredictions,
+        aiInsights,
         previousReportsCount: previousReports.length,
         analysisMethod: isImage ? 'ocr_image' : 'text_extraction',
         extractedText: extractedText.substring(0, 5000),
@@ -198,9 +239,12 @@ router.post('/chat', protect, async (req, res) => {
     if (!message || message.trim() === '') {
       return res.status(400).json({ success: false, message: 'Message is required' });
     }
-    // Use trained QA model only
-    const answer = await qaAnswer(message);
-    res.status(200).json({ success: true, data: { response: answer } });
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(503).json({ success: false, message: 'AI service is not configured' });
+    }
+    const groqClient = (await import('../services/groqClient.js')).default;
+    const resp = await groqClient.chatFlow({ message });
+    res.status(200).json({ success: true, data: { response: resp.response } });
   } catch (error) {
     console.error('AI Chat (ML) Error:', error.message);
     res.status(500).json({ success: false, message: 'Failed to get response from trained model', error: error.message });
@@ -293,12 +337,12 @@ router.get('/who-guidelines/:topic', protect, async (req, res) => {
 // @access  Public
 router.get('/health', async (req, res) => {
   try {
-    const hasGeminiKey = !!process.env.GEMINI_API_KEY;
+    const hasGroqKey = !!process.env.GROQ_API_KEY;
     res.status(200).json({
       success: true,
-      service: 'Gemini AI (Node.js)',
-      status: hasGeminiKey ? 'configured' : 'not configured',
-      message: hasGeminiKey ? 'AI service is ready' : 'GEMINI_API_KEY not set',
+      service: 'AI service',
+      status: hasGroqKey ? 'configured' : 'not configured',
+      message: hasGroqKey ? 'AI service is ready' : 'GROQ_API_KEY not set',
     });
   } catch (error) {
     res.status(503).json({
@@ -309,4 +353,4 @@ router.get('/health', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

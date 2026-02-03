@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const Medicine = require('../models/Medicine');
-const { protect, authorize } = require('../middleware/auth');
+import Medicine from '../models/Medicine.js';
+import { protect, authorize } from '../middleware/auth.js';
 
 // @route   GET /api/medicines/search
 // @desc    Search medicines
@@ -176,4 +176,4 @@ router.delete('/:id', protect, authorize('admin'), async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

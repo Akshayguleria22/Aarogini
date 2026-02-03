@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const RAW_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = RAW_BASE.endsWith('/api') ? RAW_BASE : `${RAW_BASE.replace(/\/$/, '')}/api`;
 
 // Get auth token
 const getAuthToken = () => {

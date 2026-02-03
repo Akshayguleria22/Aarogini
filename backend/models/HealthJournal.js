@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const healthJournalSchema = new mongoose.Schema({
   user: {
@@ -63,4 +63,4 @@ healthJournalSchema.pre('save', function(next) {
   next();
 });
 
-module.exports = mongoose.model('HealthJournal', healthJournalSchema);
+export default mongoose.model('HealthJournal', healthJournalSchema);

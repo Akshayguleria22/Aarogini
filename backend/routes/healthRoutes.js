@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const HealthJournal = require('../models/HealthJournal');
-const { protect } = require('../middleware/auth');
+import HealthJournal from '../models/HealthJournal.js';
+import { protect } from '../middleware/auth.js';
 
 // @route   POST /api/health
 // @desc    Create a new health journal entry
@@ -167,4 +167,4 @@ router.delete('/:id', protect, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,22 +1,27 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import Skeleton from '../ui/Skeleton'
+import api from '../../utils/api'
 
-const ArticlesSlider = () => {
+const ArticlesSlider = ({ loading }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [imageLoaded, setImageLoaded] = useState(false)
 
-  const articles = [
+  const fallbackArticles = [
     { 
       title: "Holistic Wellness Approach",
       description: "Comprehensive guide to mind, body, and spirit wellness for women",
       time: "1h ago",
       tag: "Holistic",
-      image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&h=600&fit=crop"
+      image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&h=600&fit=crop",
+      url: "https://www.who.int/health-topics/womens-health"
     },
     { 
       title: "Prenatal Yoga Benefits", 
       description: "Discover how yoga can help during pregnancy",
       time: "2h ago", 
       tag: "Wellness",
-      image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=600&fit=crop"
+      image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=600&fit=crop",
+      url: "https://www.cdc.gov/nutrition/index.html"
     },
     { 
       title: "Iron-Rich Foods Guide", 
@@ -76,6 +81,40 @@ const ArticlesSlider = () => {
     },
   ]
 
+  const [newsArticles, setNewsArticles] = useState([])
+
+  const articles = useMemo(() => {
+    if (newsArticles.length > 0) return newsArticles
+    return fallbackArticles
+  }, [newsArticles])
+
+  useEffect(() => {
+    let isMounted = true
+    const loadNews = async () => {
+      try {
+        const response = await api.get('/news', {
+          params: { q: 'women health wellness', limit: 10 }
+        })
+        const items = response.data?.data || []
+        if (isMounted && items.length) {
+          const mapped = items.map((item) => ({
+            title: item.title,
+            description: item.description || 'Read the full article to learn more.',
+            time: item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : 'Recent',
+            tag: item.source?.name || 'News',
+            image: item.image || 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&h=600&fit=crop',
+            url: item.url
+          }))
+          setNewsArticles(mapped)
+        }
+      } catch {
+        // fallback silently
+      }
+    }
+    loadNews()
+    return () => { isMounted = false }
+  }, [])
+
   // Auto-slide effect
   useEffect(() => {
     const interval = setInterval(() => {
@@ -85,12 +124,25 @@ const ArticlesSlider = () => {
     return () => clearInterval(interval)
   }, [articles.length])
 
+  useEffect(() => {
+    setImageLoaded(false)
+  }, [currentIndex])
+
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev - 1 + articles.length) % articles.length)
   }
 
   const goToNext = () => {
     setCurrentIndex((prev) => (prev + 1) % articles.length)
+  }
+
+  if (loading) {
+    return (
+      <div className="relative bg-white/60 backdrop-blur-sm rounded-3xl p-5 shadow-lg" style={{ width: '45%' }}>
+        <Skeleton className="h-6 w-48 rounded-lg mb-4" />
+        <Skeleton className="h-[350px] w-full rounded-2xl" />
+      </div>
+    )
   }
 
   return (
@@ -101,11 +153,15 @@ const ArticlesSlider = () => {
       <div className="relative overflow-hidden rounded-2xl" style={{ height: '350px' }}>
         {/* Article Card */}
         <div className="relative w-full h-full">
-          <img
-            src={articles[currentIndex].image}
-            alt={articles[currentIndex].title}
-            className="w-full h-full object-cover transition-opacity duration-500"
-          />
+          {!imageLoaded && <Skeleton className="absolute inset-0 rounded-2xl" />}
+          <a href={articles[currentIndex].url} target="_blank" rel="noreferrer" className="block w-full h-full">
+            <img
+              src={articles[currentIndex].image}
+              alt={articles[currentIndex].title}
+              className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onLoad={() => setImageLoaded(true)}
+            />
+          </a>
 
           {/* Dark Overlay for Text Readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
@@ -118,15 +174,17 @@ const ArticlesSlider = () => {
               </span>
             </div>
             
-            <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
-              {articles[currentIndex].title}
-            </h3>
+            <a href={articles[currentIndex].url} target="_blank" rel="noreferrer" className="block">
+              <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
+                {articles[currentIndex].title}
+              </h3>
 
-            <p className="text-base text-white/90 leading-relaxed mb-2 drop-shadow-md">
-              {articles[currentIndex].description}
-            </p>
+              <p className="text-base text-white/90 leading-relaxed mb-2 drop-shadow-md">
+                {articles[currentIndex].description}
+              </p>
 
-            <span className="text-xs text-white/70">{articles[currentIndex].time}</span>
+              <span className="text-xs text-white/70">{articles[currentIndex].time}</span>
+            </a>
           </div>
         </div>
 

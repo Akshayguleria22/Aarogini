@@ -1,10 +1,10 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { protect } = require('../middleware/auth');
-const MedicalReport = require('../models/MedicalReport');
-const User = require('../models/User');
-const PeriodTracker = require('../models/PeriodTracker');
-const { getWomenHealthGuidelines } = require('../services/whoService');
+import { protect } from '../middleware/auth.js';
+import MedicalReport from '../models/MedicalReport.js';
+import User from '../models/User.js';
+import PeriodTracker from '../models/PeriodTracker.js';
+import { getWomenHealthGuidelines } from '../services/whoService.js';
 
 // Women's health conditions to track (21 conditions as per requirement)
 const HEALTH_CONDITIONS = [
@@ -45,7 +45,7 @@ router.get('/dashboard', protect, async (req, res) => {
       .lean();
 
     // Get period tracker data
-    const periodData = await PeriodTracker.find({ userId: req.user.id })
+    const periodData = await PeriodTracker.find({ user: req.user.id })
       .sort({ cycleStartDate: -1 })
       .limit(6)
       .lean();
@@ -374,4 +374,4 @@ router.get('/trends', protect, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

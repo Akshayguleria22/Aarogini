@@ -1,12 +1,30 @@
 import React from 'react'
+import { cn } from '../../lib/utils'
+import Skeleton from '../ui/Skeleton'
 
-const FeatureCards = ({ activeFeature, setActiveFeature }) => {
+const FeatureCards = ({ activeFeature, setActiveFeature, loading }) => {
   const mainFeatures = [
-    { img: '/blood.jpg', name: 'PERIOD TRACKER', color: 'from-pink-400 to-purple-400' },
-    { img: '/medicine.jpg', name: 'MEDICINE SEARCH', color: 'from-purple-400 to-purple-500' },
-    { img: '/report.jpg', name: 'REPORT RECORD', color: 'from-purple-500 to-indigo-500' },
-    { img: '/chat.jpg', name: 'CHAT VEDA (AI CHATBOT)', color: 'from-indigo-400 to-purple-400' },
+    { img: '/blood.jpg', name: 'PERIOD TRACKER' },
+    { img: '/medicine.jpg', name: 'MEDICINE SEARCH' },
+    { img: '/report.jpg', name: 'REPORT RECORD' },
+    { img: '/chat.jpg', name: 'CHAT VEDA (AI CHATBOT)' },
   ]
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-4 gap-3">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div
+            key={index}
+            className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 min-h-[240px]"
+          >
+            <Skeleton className="w-16 h-16 rounded-full mb-4" />
+            <Skeleton className="h-4 w-3/4 rounded-md" />
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-4 gap-3 animate-fade-in animation-delay-200">
@@ -14,53 +32,29 @@ const FeatureCards = ({ activeFeature, setActiveFeature }) => {
         <div
           key={index}
           onClick={() => setActiveFeature(index)}
-          className={`group relative p-6 rounded-2xl cursor-pointer animate-fade-in-up transition-all duration-500 ${
-            activeFeature !== index ? 'hover:shadow-2xl' : ''
-          }`}
+          className={cn(
+            "group relative p-6 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-105",
+            "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800",
+            "hover:shadow-2xl hover:border-pink-500 dark:hover:border-pink-500",
+            activeFeature === index && "border-pink-500 dark:border-pink-500 shadow-2xl shadow-pink-500/20",
+            "min-h-[240px] flex flex-col justify-center items-center"
+          )}
           style={{
             animationDelay: `${index * 100 + 400}ms`,
-            minHeight: '240px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            background: activeFeature === index 
-              ? 'linear-gradient(135deg, #A38AEB 0%, #9370DB 100%)' 
-              : '#FFFFFF',
-            boxShadow: activeFeature === index
-              ? '0 15px 30px rgba(163, 138, 235, 0.4)'
-              : '0 8px 20px rgba(0, 0, 0, 0.05)'
-          }}
-          onMouseEnter={(e) => {
-            if (activeFeature !== index) {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #A38AEB 0%, #9370DB 100%)'
-              const icon = e.currentTarget.querySelector('.feature-icon')
-              const text = e.currentTarget.querySelector('.feature-text')
-              if (icon) icon.style.color = 'white'
-              if (text) text.style.color = 'white'
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (activeFeature !== index) {
-              e.currentTarget.style.background = '#FFFFFF'
-              const icon = e.currentTarget.querySelector('.feature-icon')
-              const text = e.currentTarget.querySelector('.feature-text')
-              if (icon) icon.style.color = '#9333ea'
-              if (text) text.style.color = '#374151'
-            }
           }}
         >
-          <div className={`feature-icon mb-4 transition-all duration-300 group-hover:scale-110 ${activeFeature === index ? '' : ''
-          }`}>
+          <div className="mb-4 transition-all duration-300 group-hover:scale-110">
             <img
               src={feature.img}
               alt={feature.name}
-              className="w-16 h-16 rounded-full object-cover shadow-md"
+              className="w-16 h-16 rounded-full object-cover shadow-md ring-2 ring-pink-500/50"
             />
           </div>
-          <p className={`feature-text text-xs font-semibold tracking-wider uppercase leading-tight text-center ${
-            activeFeature === index ? 'text-white' : 'text-gray-700'
-          }`}>
+          <p className={cn(
+            "text-xs font-semibold tracking-wider uppercase leading-tight text-center",
+            "text-zinc-700 dark:text-zinc-300",
+            activeFeature === index && "text-pink-600 dark:text-pink-400"
+          )}>
             {feature.name}
           </p>
         </div>

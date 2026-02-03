@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const medicineSchema = new mongoose.Schema({
   name: {
@@ -76,4 +76,4 @@ const medicineSchema = new mongoose.Schema({
 // Create indexes for search
 medicineSchema.index({ name: 'text', genericName: 'text', description: 'text' });
 
-module.exports = mongoose.model('Medicine', medicineSchema);
+export default mongoose.model('Medicine', medicineSchema);

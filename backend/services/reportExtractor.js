@@ -1,7 +1,7 @@
-const pdf = require('pdf-parse');
-const Tesseract = require('tesseract.js');
-const sharp = require('sharp');
-const fs = require('fs');
+import pdf from 'pdf-parse';
+import Tesseract from 'tesseract.js';
+import sharp from 'sharp';
+import fs from 'fs';
 
 /**
  * Extract text from PDF file
@@ -66,7 +66,27 @@ async function extractText(filePath, fileType) {
   }
 }
 
-module.exports = {
+export async function extractReportText(file) {
+  // Accept either a file path string or an object (e.g., multer file)
+  let filePath = file;
+  let ext = '';
+  try {
+    if (typeof file === 'object' && file !== null) {
+      filePath = file.path || file.filepath || file.filename || file;
+      ext = (file.originalname && file.originalname.slice(((file.originalname.lastIndexOf(".") - 1) >>> 0) + 2)) || '';
+    }
+    if (typeof filePath === 'string') {
+      const path = filePath;
+      const dotIdx = path.lastIndexOf('.');
+      ext = dotIdx !== -1 ? path.slice(dotIdx) : '';
+    }
+    return await extractText(filePath, ext);
+  } catch (err) {
+    throw err;
+  }
+}
+
+export {
   extractText,
   extractTextFromPDF,
   extractTextFromImage,

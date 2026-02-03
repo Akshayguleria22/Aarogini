@@ -1,8 +1,9 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
-const connectDatabase = require('./config/database');
-const Medicine = require('./models/Medicine');
-const Article = require('./models/Article');
+import dotenv from 'dotenv';
+dotenv.config();
+import mongoose from 'mongoose';
+import connectDatabase from './config/database.js';
+import Medicine from './models/Medicine.js';
+import Article from './models/Article.js';
 
 const medicines = [
   {

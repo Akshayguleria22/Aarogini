@@ -1,6 +1,19 @@
 import React from 'react'
+import Skeleton from '../ui/Skeleton'
 
-const HeroSection = () => {
+const HeroSection = ({ loading }) => {
+  if (loading) {
+    return (
+      <div className="space-y-3 pt-2 flex-1">
+        <Skeleton className="h-10 w-2/3 rounded-xl" />
+        <Skeleton className="h-10 w-1/2 rounded-xl" />
+        <Skeleton className="h-5 w-full rounded-lg" />
+        <Skeleton className="h-5 w-5/6 rounded-lg" />
+        <Skeleton className="h-5 w-3/4 rounded-lg" />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-3 animate-slide-in-left pt-2 flex-1">
       <h1 className="text-5xl font-bold leading-tight tracking-tight" style={{ color: '#3B3A60' }}>

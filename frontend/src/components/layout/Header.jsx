@@ -35,18 +35,7 @@ const Header = () => {
         {/* Right icons */}
         <div className="flex items-center space-x-4">
           {/* Language Switcher */}
-          <div className="hidden sm:block">
-            <select
-              aria-label="Language"
-              className="text-xs px-2 py-1 bg-white/70 backdrop-blur-sm border border-white/40 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-              value={(i18n.language || 'en').split('-')[0]}
-              onChange={(e) => i18n.changeLanguage(e.target.value)}
-            >
-              <option value="en">EN</option>
-              <option value="hi">हिं</option>
-              <option value="pa">ਪੰ</option>
-            </select>
-          </div>
+
           {isAuthenticated ? (
             <>
               {/* User Info */}

@@ -1,8 +1,9 @@
-const express = require('express');
+export { default } from './medicineSearchNew.js';
+import express from 'express';
 const router = express.Router();
-const { protect } = require('../middleware/auth');
-const { chatFlow } = require('../services/geminiClient');
-const { searchDrugDetails, searchDrugEvents } = require('../services/openFdaService');
+import { protect } from '../middleware/auth.js';
+import { chatFlow } from '../services/groqClient.js';
+import { searchDrugDetails, searchDrugEvents } from '../services/openFdaService.js';
 const OPENFDA_API_KEY = process.env.OPENFDA_API_KEY;
 
 // @route   POST /api/medicine-search
@@ -92,8 +93,8 @@ Provide a detailed comparison including:
 2. **Effectiveness**: How they compare in treating similar conditions
 3. **Side Effects**: Comparison of side effect profiles
 4. **Cost**: General price range (generic vs brand)
-5. **Availability**: Prescription vs over-the-counter
-6. **Key Differences**: Main differences between them
+    // @route   POST /api/medicine-search
+    // @desc    Search for medicine information using AI
 7. **Which to Choose**: When to prefer one over the other
 
 Present in a clear comparison format.`;
@@ -103,7 +104,7 @@ Present in a clear comparison format.`;
         `\n**Purpose**\n- ${medicines[0]}: Pain relief (demo)\n- ${medicines[1]}: Pain relief + anti-inflammatory (demo)`,
         `\n**Effectiveness**\n- ${medicines[0]}: Effective for fever and mild pain\n- ${medicines[1]}: Better for inflammatory pain`,
         `\n**Side Effects**\n- ${medicines[0]}: Nausea, dizziness (rare)\n- ${medicines[1]}: Stomach upset, reflux (demo)`,
-        `\n**Cost**\n- Both have low-cost generics (demo)`,
+      if (!process.env.GROQ_API_KEY) {
         `\n**Availability**\n- ${medicines[0]}: OTC in many regions\n- ${medicines[1]}: OTC/Rx depending on strength (demo)`,
         `\n**Key Differences**\n- Anti-inflammatory benefit, GI tolerance`,
         `\n**Which to Choose**\n- Fever/headache: ${medicines[0]}\n- Muscle/joint inflammation: ${medicines[1]}`
@@ -112,16 +113,16 @@ Present in a clear comparison format.`;
       return res.status(200).json({
         success: true,
         data: { medicines, comparison: `${header}\n${demo}`, source: 'dummy' }
-      });
-    }
-
-    const response = await chatFlow({
-      message: prompt,
-      userContext: 'User is comparing multiple medicines'
-    });
-
-    res.status(200).json({
-      success: true,
+    1. Generic & brand names
+    2. Category
+    3. Uses
+    4. Mechanism
+    5. Dosage
+    6. When to take
+    7. Side effects
+    8. Precautions
+    9. Interactions
+    10. Storage
       data: {
         medicines: medicines,
         comparison: response.response
@@ -142,7 +143,7 @@ Present in a clear comparison format.`;
 router.post('/interactions', async (req, res) => {
   try {
     const { medicines, conditions } = req.body;
-
+    if (!process.env.GROQ_API_KEY) {
     if (!medicines || !Array.isArray(medicines) || medicines.length < 1) {
       return res.status(400).json({
         success: false,
@@ -174,13 +175,13 @@ Be specific and clear about safety concerns.`;
         `\n**Food Interactions**\n- Avoid excess alcohol; take with food if GI upset occurs (demo)`,
         `\n**Condition Warnings**\n- ${(conditions || []).join(', ') || 'No conditions provided'}`
       ].join('\n');
-
-      return res.status(200).json({
-        success: true,
-        data: { medicines, conditions: conditions || [], interactions: lines, source: 'dummy' }
-      });
-    }
-
+      1. Purpose
+      2. Effectiveness
+      3. Side Effects
+      4. Cost
+      5. Availability
+      6. Key Differences
+      7. Which to Choose
     const response = await chatFlow({
       message: prompt,
       userContext: 'User is checking medicine interactions for safety'
@@ -217,7 +218,7 @@ router.get('/categories', async (req, res) => {
         description: 'Analgesics for pain management'
       },
       {
-        name: 'Antibiotics',
+        if(!process.env.GROQ_API_KEY) {
         icon: '🦠',
         examples: ['Amoxicillin', 'Azithromycin', 'Ciprofloxacin'],
         description: 'Treats bacterial infections'
@@ -407,4 +408,4 @@ router.get('/openfda/events', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

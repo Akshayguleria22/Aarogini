@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 // WHO API Configuration
 // WHO provides several APIs for health data
@@ -323,7 +323,7 @@ const analyzeReportWithWHO = async (reportData) => {
   }
 };
 
-module.exports = {
+export {
   getHealthIndicators,
   getHealthData,
   searchWomenHealthInfo,

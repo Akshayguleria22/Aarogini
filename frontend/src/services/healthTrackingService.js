@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import api from '../utils/api.js';
 
 // Get auth token
 const getAuthToken = () => {
@@ -11,11 +9,7 @@ const getAuthToken = () => {
 // Get comprehensive health dashboard
 export const getHealthDashboard = async () => {
   try {
-    const response = await axios.get(`${API_URL}/health-tracking/dashboard`, {
-      headers: {
-        Authorization: getAuthToken(),
-      },
-    });
+    const response = await api.get('/health-tracking/dashboard');
 
     return response.data;
   } catch (error) {
@@ -27,14 +21,7 @@ export const getHealthDashboard = async () => {
 // Get detailed info for a specific condition
 export const getConditionDetails = async (conditionName) => {
   try {
-    const response = await axios.get(
-      `${API_URL}/health-tracking/condition/${encodeURIComponent(conditionName)}`,
-      {
-        headers: {
-          Authorization: getAuthToken(),
-        },
-      }
-    );
+    const response = await api.get(`/health-tracking/condition/${encodeURIComponent(conditionName)}`);
 
     return response.data;
   } catch (error) {
@@ -46,11 +33,7 @@ export const getConditionDetails = async (conditionName) => {
 // Get health trends over time
 export const getHealthTrends = async () => {
   try {
-    const response = await axios.get(`${API_URL}/health-tracking/trends`, {
-      headers: {
-        Authorization: getAuthToken(),
-      },
-    });
+    const response = await api.get('/health-tracking/trends');
 
     return response.data;
   } catch (error) {

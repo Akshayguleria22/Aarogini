@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const User = require('../models/User');
-const { protect, authorize } = require('../middleware/auth');
+import User from '../models/User.js';
+import { protect, authorize } from '../middleware/auth.js';
 
 // @route   GET /api/users/profile
 // @desc    Get user profile
@@ -87,4 +87,4 @@ router.get('/', protect, authorize('admin'), async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

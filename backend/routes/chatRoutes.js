@@ -1,19 +1,19 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const ChatMessage = require('../models/ChatMessage');
-const { protect } = require('../middleware/auth');
-const { qaAnswer } = require('../services/modelService');
-const User = require('../models/User');
-const PeriodTracker = require('../models/PeriodTracker');
-const HealthJournal = require('../models/HealthJournal');
-const Medicine = require('../models/Medicine');
+import ChatMessage from '../models/ChatMessage.js';
+import { protect } from '../middleware/auth.js';
+import { chatFlow } from '../services/groqClient.js';
+import User from '../models/User.js';
+import PeriodTracker from '../models/PeriodTracker.js';
+import HealthJournal from '../models/HealthJournal.js';
+import Medicine from '../models/Medicine.js';
 
 // Helper function to get user context
 const getUserContext = async (userId) => {
   const user = await User.findById(userId).select('name email healthProfile detectedConditions');
-  const periods = await PeriodTracker.find({ userId }).sort({ cycleStartDate: -1 }).limit(3).lean();
-  const journals = await HealthJournal.find({ userId }).sort({ date: -1 }).limit(5).lean();
-  const medicines = await Medicine.find({ userId, isActive: true }).lean();
+  const periods = await PeriodTracker.find({ user: userId }).sort({ cycleStartDate: -1 }).limit(3).lean();
+  const journals = await HealthJournal.find({ user: userId }).sort({ date: -1 }).limit(5).lean();
+  const medicines = await Medicine.find({ user: userId, isActive: true }).lean();
 
   let contextStr = '';
   if (user) {
@@ -71,13 +71,42 @@ router.post('/message', protect, async (req, res) => {
     // Add user message
     chatSession.messages.push({ sender: 'user', text, timestamp: new Date() });
 
-    // Use trained QA model only
+    // Use GROQ AI exclusively - no fallbacks to predefined responses
     let botText = '';
+
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(503).json({
+        success: false,
+        message: 'AI service is not configured. Please contact support.'
+      });
+    }
+
     try {
-      botText = await qaAnswer(text);
-    } catch (mlErr) {
-      console.warn('QA model failed:', mlErr.message);
-      botText = generateBotResponse(text);
+      const userCtx = await getUserContext(req.user.id);
+
+      console.log(`[chatRoutes] Using GROQ AI for user ${req.user.id} session ${sessionId}`);
+
+      const resp = await chatFlow({
+        message: text,
+        conversationHistory: chatSession.messages.map(m => `${m.sender}: ${m.text}`).join('\n'),
+        userContext: userCtx
+      });
+
+      botText = (resp && resp.response) ? resp.response : (typeof resp === 'string' ? resp : '');
+
+      if (!botText || botText.trim() === '') {
+        throw new Error('Empty response from Groq AI');
+      }
+
+      console.log(`[chatRoutes] GROQ response: ${botText.substring(0, 200)}...`);
+
+    } catch (gErr) {
+      console.error('GROQ AI error:', gErr.message);
+      return res.status(500).json({
+        success: false,
+        message: 'AI service temporarily unavailable. Please try again in a moment.',
+        error: gErr.message
+      });
     }
 
     chatSession.messages.push({ sender: 'bot', text: botText, timestamp: new Date() });
@@ -96,17 +125,13 @@ router.post('/message', protect, async (req, res) => {
 // @access  Private
 router.post('/insights', protect, async (req, res) => {
   try {
-    const ctx = await getUserContext(req.user.id);
-    const tips = [];
-    if (ctx.includes('Detected Health Conditions')) tips.push('Review your detected conditions and follow the WHO guidelines we surface in the reports tab.');
-    if (ctx.includes('Recent Menstrual Cycles')) tips.push('Track cycle symptoms to identify patterns and discuss with your provider if needed.');
-    if (ctx.includes('Current Medications')) tips.push('Keep your medication list up to date and set reminders to maintain adherence.');
-    if (tips.length < 3) {
-      tips.push('Aim for 7–8 hours of sleep, balanced meals, and regular physical activity.');
-      tips.push('Schedule periodic health checkups and record results in the app to see trends.');
-      tips.push('Manage stress with brief daily mindfulness or breathing exercises.');
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(503).json({ success: false, message: 'AI service is not configured' });
     }
-    res.status(200).json({ success: true, data: tips.slice(0, 5).join('\n• ') });
+    const ctx = await getUserContext(req.user.id);
+    const prompt = `Provide 5 concise, personalized health insights based on this user context. Use bullet points, each on a new line, and avoid medical diagnosis claims.\n\nUser Context:\n${ctx}`;
+    const resp = await chatFlow({ message: prompt, userContext: ctx });
+    res.status(200).json({ success: true, data: resp.response });
   } catch (error) {
     console.error('Insights generation error:', error);
     res.status(500).json({ success: false, message: 'Failed to generate insights. Please try again later.' });
@@ -196,27 +221,4 @@ router.delete('/session/:sessionId', protect, async (req, res) => {
   }
 });
 
-// Helper function to generate bot responses
-function generateBotResponse(userMessage) {
-  const lowerMessage = userMessage.toLowerCase();
-  
-  if (lowerMessage.includes('period') || lowerMessage.includes('menstrual')) {
-    return "I can help you track your period and understand your cycle better. The Period Tracker feature allows you to log your cycle dates, symptoms, and mood. Would you like tips on managing period symptoms?";
-  } else if (lowerMessage.includes('stress') || lowerMessage.includes('anxiety')) {
-    return "Managing stress is crucial for overall wellness. Try these tips: Practice deep breathing, maintain a regular sleep schedule, engage in physical activity, and consider meditation. Would you like more specific guidance?";
-  } else if (lowerMessage.includes('medicine') || lowerMessage.includes('medication')) {
-    return "You can use our Medicine Search feature to find information about medications. Always consult with a healthcare professional before starting any new medication. Is there something specific you'd like to know?";
-  } else if (lowerMessage.includes('health') || lowerMessage.includes('wellness')) {
-    return "Holistic wellness includes physical, mental, and emotional health. I recommend: regular exercise, balanced nutrition, adequate sleep, stress management, and regular health check-ups. What aspect would you like to explore?";
-  } else if (lowerMessage.includes('report') || lowerMessage.includes('record')) {
-    return "Our Report Record feature helps you maintain all your medical reports in one place. Keeping organized health records is important for tracking your wellness journey. Would you like guidance on what to track?";
-  } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-    return "Hello! I'm here to support your wellness journey. Feel free to ask me about period tracking, stress management, healthy habits, or any wellness-related questions!";
-  } else if (lowerMessage.includes('thank')) {
-    return "You're welcome! I'm always here to help with your wellness journey. Is there anything else you'd like to know?";
-  } else {
-    return "That's an interesting question! While I'm here to help with wellness, period tracking, stress management, and healthy lifestyle tips, I recommend consulting with healthcare professionals for specific medical advice. How else can I assist you today?";
-  }
-}
-
-module.exports = router;
+export default router;

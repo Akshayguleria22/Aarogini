@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { Bot, CalendarDays, HeartPulse, Pill, Sparkles, BarChart3 } from 'lucide-react'
 import { sendChatMessage, generateSessionId, getHealthInsights } from '../../services/chatService'
 
 const ChatBot = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm Chat Veda, your AI-powered health assistant. I'm connected to advanced AI (via OpenRouter) and have access to your health data to provide personalized advice. How can I help you today?",
+      text: "Hello! I'm Chat Veda, your AI-powered health assistant. I'm connected to Groq Llama 3 and can use your health data to provide personalized advice. How can I help you today?",
       sender: 'bot',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
@@ -25,10 +26,10 @@ const ChatBot = ({ isOpen, onClose }) => {
   const inputRef = useRef(null)
 
   const quickActions = [
-    { icon: '🩸', label: 'Period Tracking', query: 'Tell me about period tracking' },
-    { icon: '🤰', label: 'Pregnancy Care', query: 'I need pregnancy care advice' },
-    { icon: '💊', label: 'Medicine Info', query: 'Help me with medicine information' },
-    { icon: '🧘‍♀️', label: 'Wellness Tips', query: 'Give me wellness tips' },
+    { icon: CalendarDays, label: 'Period Tracking', query: 'Tell me about period tracking' },
+    { icon: HeartPulse, label: 'Pregnancy Care', query: 'I need pregnancy care advice' },
+    { icon: Pill, label: 'Medicine Info', query: 'Help me with medicine information' },
+    { icon: Sparkles, label: 'Wellness Tips', query: 'Give me wellness tips' },
   ]
 
   const scrollToBottom = () => {
@@ -36,14 +37,16 @@ const ChatBot = ({ isOpen, onClose }) => {
   }
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus()
     }
   }, [isOpen])
+
+  useEffect(() => {
+    if (isOpen) {
+      scrollToBottom()
+    }
+  }, [messages, isTyping, isOpen])
 
   // Get personalized health insights
   const handleGetInsights = async () => {
@@ -122,15 +125,14 @@ const ChatBot = ({ isOpen, onClose }) => {
           setMessages(prev => [...prev, botMsg])
         }
       } else {
-        // Fallback to local response if API fails
-        const fallbackMsg = {
+        setError(response.error || 'AI service unavailable')
+        const errorMsg = {
           id: messages.length + 2,
-          text: "I'm having trouble connecting to my AI brain right now. Please try again in a moment. In the meantime, I can still provide basic information about period tracking, wellness, and platform features!",
+          text: "I'm having trouble reaching the AI service right now. Please try again in a moment.",
           sender: 'bot',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
-        setMessages(prev => [...prev, fallbackMsg])
-        setError(response.error)
+        setMessages(prev => [...prev, errorMsg])
       }
     } catch (error) {
       console.error('Chat error:', error)
@@ -170,12 +172,12 @@ const ChatBot = ({ isOpen, onClose }) => {
       />
 
       {/* Chat Window */}
-      <div className="fixed bottom-4 right-4 z-50 w-96 h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in-fast">
+      <div className="fixed bottom-4 right-4 z-50 w-[420px] h-[680px] bg-white dark:bg-zinc-950 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in-fast">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-pink-500 p-4 flex items-center justify-between">
+        <div className="bg-zinc-800 dark:bg-zinc-900 border-b border-zinc-700 p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-              <span className="text-2xl">🤖</span>
+              <Bot className="w-5 h-5 text-zinc-900" />
             </div>
             <div>
               <h3 className="text-white font-semibold text-lg">Chat Veda</h3>
@@ -193,16 +195,16 @@ const ChatBot = ({ isOpen, onClose }) => {
         </div>
 
         {/* Quick Actions */}
-        <div className="p-3 bg-purple-50 border-b border-purple-100">
+        <div className="p-3 bg-purple-50 dark:bg-zinc-900 border-b border-purple-100 dark:border-zinc-800">
           <div className="grid grid-cols-2 gap-2">
             {quickActions.map((action, index) => (
               <button
                 key={index}
                 onClick={() => handleQuickAction(action.query)}
-                className="flex items-center gap-2 p-2 bg-white rounded-lg hover:bg-purple-100 transition-colors text-sm"
+                className="flex items-center gap-2 p-2 bg-white dark:bg-zinc-900 rounded-lg hover:bg-purple-100 dark:hover:bg-zinc-800 transition-colors text-sm"
               >
-                <span className="text-lg">{action.icon}</span>
-                <span className="text-gray-700 font-medium">{action.label}</span>
+                <action.icon className="w-4 h-4 text-purple-600" />
+                <span className="text-gray-700 dark:text-zinc-200 font-medium">{action.label}</span>
               </button>
             ))}
           </div>
@@ -210,9 +212,9 @@ const ChatBot = ({ isOpen, onClose }) => {
           {/* Health Insights Button */}
           <button
             onClick={handleGetInsights}
-            className="w-full mt-2 flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:shadow-lg transition-all text-sm font-medium"
+            className="w-full mt-2 flex items-center justify-center gap-2 p-2 bg-zinc-700 dark:bg-zinc-800 text-zinc-100 border border-zinc-600 rounded-lg hover:bg-zinc-600 dark:hover:bg-zinc-700 hover:shadow-lg transition-all text-sm font-medium"
           >
-            <span>📊</span>
+            <BarChart3 className="w-4 h-4" />
             <span>Get My Health Insights</span>
           </button>
 
@@ -225,7 +227,7 @@ const ChatBot = ({ isOpen, onClose }) => {
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-zinc-900 scroll-smooth">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -235,8 +237,8 @@ const ChatBot = ({ isOpen, onClose }) => {
                 <div
                   className={`rounded-2xl p-3 ${
                     message.sender === 'user'
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white'
-                      : 'bg-white text-gray-800 shadow-sm'
+                    ? 'bg-pink-500 dark:bg-pink-600 text-white'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200 dark:border-zinc-700'
                   }`}
                 >
                   <p className="text-sm whitespace-pre-line leading-relaxed">{message.text}</p>
@@ -265,7 +267,7 @@ const ChatBot = ({ isOpen, onClose }) => {
         </div>
 
         {/* Input Area */}
-        <div className="p-4 bg-white border-t border-gray-200">
+        <div className="p-4 bg-white dark:bg-zinc-950 border-t border-gray-200 dark:border-zinc-800">
           <div className="flex gap-2">
             <textarea
               ref={inputRef}
@@ -273,14 +275,14 @@ const ChatBot = ({ isOpen, onClose }) => {
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type your message..."
-              className="flex-1 resize-none rounded-xl border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+              className="flex-1 resize-none rounded-xl border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
               rows="1"
               style={{ maxHeight: '100px' }}
             />
             <button
               onClick={handleSendMessage}
               disabled={inputMessage.trim() === ''}
-              className="bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-xl px-4 py-2 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-pink-500 dark:bg-pink-600 text-white rounded-xl px-4 py-2 hover:bg-pink-600 dark:hover:bg-pink-700 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -288,7 +290,7 @@ const ChatBot = ({ isOpen, onClose }) => {
             </button>
           </div>
           <p className="text-xs text-gray-400 mt-2 text-center">
-            Powered by OpenAI GPT. Chat Veda provides personalized information based on your data. Always consult healthcare professionals for medical advice.
+            Powered by Groq Llama 3. Chat Veda provides personalized information based on your data. Always consult healthcare professionals for medical advice.
           </p>
         </div>
       </div>

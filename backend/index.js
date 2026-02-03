@@ -1,7 +1,23 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const connectDatabase = require('./config/database');
+import dotenv from 'dotenv';
+dotenv.config();
+import express from 'express';
+import cors from 'cors';
+import connectDatabase from './config/database.js';
+import authRoutes from './routes/authRoutes.js';
+import doctorRoutes from './routes/doctorRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import periodRoutes from './routes/periodRoutes.js';
+import reportRoutes from './routes/reportRoutes.js';
+import medicineRoutes from './routes/medicineRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
+import healthRoutes from './routes/healthRoutes.js';
+import healthTrackingRoutes from './routes/healthTrackingRoutes.js';
+import articleRoutes from './routes/articleRoutes.js';
+import whoRoutes from './routes/whoRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
+import medicineSearchNew from './routes/medicineSearchNew.js';
+import newsRoutes from './routes/newsRoutes.js';
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -49,18 +65,20 @@ app.get('/', (req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/periods', require('./routes/periodRoutes'));
-app.use('/api/reports', require('./routes/reportRoutes'));
-app.use('/api/medicines', require('./routes/medicineRoutes'));
-app.use('/api/chat', require('./routes/chatRoutes'));
-app.use('/api/health', require('./routes/healthRoutes'));
-app.use('/api/health-tracking', require('./routes/healthTrackingRoutes'));
-app.use('/api/articles', require('./routes/articleRoutes'));
-app.use('/api/who', require('./routes/whoRoutes'));
-app.use('/api/ai', require('./routes/aiRoutes'));
-app.use('/api/medicine-search', require('./routes/medicineSearchRoutes'));
+app.use('/api/auth', authRoutes);
+app.use('/api/doctor', doctorRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/periods', periodRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/medicines', medicineRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/health', healthRoutes);
+app.use('/api/health-tracking', healthTrackingRoutes);
+app.use('/api/articles', articleRoutes);
+app.use('/api/who', whoRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/medicine-search', medicineSearchNew);
+app.use('/api/news', newsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

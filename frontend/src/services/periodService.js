@@ -173,3 +173,59 @@ export const getSymptomsForRange = async (startDate, endDate) => {
     throw error
   }
 }
+
+// Track daily symptoms at specific time slot (new API)
+export const trackDailySymptoms = async (periodId, trackingData) => {
+  try {
+    const response = await api.post(`/periods/${periodId}/track-daily`, trackingData)
+    return response.data
+  } catch (error) {
+    console.error('Error tracking daily symptoms:', error)
+    if (error.response?.status === 401) {
+      // Fallback to local storage
+      const key = `tracking_${trackingData.date}_${trackingData.timeSlot}`
+      localStorage.setItem(key, JSON.stringify(trackingData))
+      return { success: true, data: trackingData, local: true }
+    }
+    throw error
+  }
+}
+
+// Get daily tracking for a specific date
+export const getDailyTracking = async (periodId, date) => {
+  try {
+    const response = await api.get(`/periods/${periodId}/daily/${date}`)
+    return response.data
+  } catch (error) {
+    console.error('Error getting daily tracking:', error)
+    if (error.response?.status === 401) {
+      return { success: true, data: null, local: true }
+    }
+    throw error
+  }
+}
+
+// Get AI recommendations for a period cycle
+export const getPeriodRecommendations = async (periodId) => {
+  try {
+    const response = await api.get(`/periods/${periodId}/recommendations`)
+    return response.data
+  } catch (error) {
+    console.error('Error getting recommendations:', error)
+    throw error
+  }
+}
+
+// Check if user needs reminder to track
+export const checkReminder = async () => {
+  try {
+    const response = await api.get('/periods/check-reminder')
+    return response.data
+  } catch (error) {
+    console.error('Error checking reminder:', error)
+    if (error.response?.status === 401) {
+      return { success: true, needsReminder: false, local: true }
+    }
+    throw error
+  }
+}

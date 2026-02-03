@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const Article = require('../models/Article');
-const { protect, authorize } = require('../middleware/auth');
+import Article from '../models/Article.js';
+import { protect, authorize } from '../middleware/auth.js';
 
 // @route   GET /api/articles
 // @desc    Get all published articles
@@ -183,4 +183,4 @@ router.post('/:id/like', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

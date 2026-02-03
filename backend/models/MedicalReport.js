@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const medicalReportSchema = new mongoose.Schema({
   user: {
@@ -84,6 +84,20 @@ const medicalReportSchema = new mongoose.Schema({
     summary: String,
     detected_conditions: [String],
   },
+  // Groq AI Insights (structured)
+  aiInsights: {
+    riskScore: Number,
+    urgencyLevel: String,
+    conditions: [mongoose.Schema.Types.Mixed],
+    abnormalFindings: [mongoose.Schema.Types.Mixed],
+    recommendations: [mongoose.Schema.Types.Mixed],
+    dietPlan: mongoose.Schema.Types.Mixed,
+    lifestyle: mongoose.Schema.Types.Mixed,
+    followUp: mongoose.Schema.Types.Mixed,
+    healthUpdates: mongoose.Schema.Types.Mixed,
+    chartData: mongoose.Schema.Types.Mixed,
+    summary: String
+  },
   // Comparison with previous reports
   comparison: {
     trends: [{
@@ -139,4 +153,4 @@ const medicalReportSchema = new mongoose.Schema({
 medicalReportSchema.index({ user: 1, uploadDate: -1 });
 medicalReportSchema.index({ 'analysis.detected_conditions': 1 });
 
-module.exports = mongoose.model('MedicalReport', medicalReportSchema);
+export default mongoose.model('MedicalReport', medicalReportSchema);

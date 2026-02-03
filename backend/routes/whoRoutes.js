@@ -1,12 +1,12 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { protect } = require('../middleware/auth');
-const {
+import { protect } from '../middleware/auth.js';
+import {
   getHealthIndicators,
   getHealthData,
   searchWomenHealthInfo,
   getWomenHealthGuidelines
-} = require('../services/whoService');
+} from '../services/whoService.js';
 
 // @route   GET /api/who/indicators
 // @desc    Get WHO health indicators
@@ -154,4 +154,4 @@ router.get('/guidelines', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

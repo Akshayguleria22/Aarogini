@@ -1,4 +1,4 @@
-import api from '../utils/api';
+import api from '../utils/api.js';
 
 // Send a chat message
 export const sendChatMessage = async (sessionId, message) => {

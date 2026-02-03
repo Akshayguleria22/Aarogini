@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 // HTTPS-only base for OpenFDA (drugs)
 const FDA_DRUG_BASE = 'https://api.fda.gov/drug/';
@@ -275,7 +275,7 @@ async function searchDrugEvents(query) {
   };
 }
 
-module.exports = {
+export {
   getLabel,
   getNdc,
   getDrugsFda,
