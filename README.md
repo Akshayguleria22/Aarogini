@@ -1,263 +1,161 @@
-# 🌸 Aarogini - Women's Health & Wellness Platform
+# Aarogini
 
 <div align="center">
-  <img src="frontend/public/logo without bg.png" alt="Aarogini Logo" width="200"/>
-  
-  ### Your Complete Health Companion for Women's Wellness
-  
-  [![React](https://img.shields.io/badge/React-19.1.1-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1.16-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-  [![Vite](https://img.shields.io/badge/Vite-7.1.7-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev/)
-  [![Node.js](https://img.shields.io/badge/Node.js-Backend-339933?style=for-the-badge&logo=node.js)](https://nodejs.org/)
+  <img src="frontend/public/logo without bg.png" alt="Aarogini" width="180" />
+  <p><strong>Women’s Health & Wellness Platform</strong></p>
+  <p>Personalized tracking, curated guidance, and AI-assisted insights for holistic care.</p>
+  <p>
+    <a href="https://reactjs.org/">React</a> ·
+    <a href="https://vitejs.dev/">Vite</a> ·
+    <a href="https://tailwindcss.com/">Tailwind CSS</a> ·
+    <a href="https://nodejs.org/">Node.js</a>
+  </p>
 </div>
 
 ---
 
-## 📋 Table of Contents
+## Overview
 
-- [About](#about)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Components](#components)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+Aarogini is a full‑stack health and wellness platform focused on women’s health. It combines a modern React frontend, a Node/Express API, and an optional ML service to deliver personalized tracking, educational content, and AI‑assisted recommendations.
 
 ---
 
-## 🌟 About
+## Key Features
 
-**Aarogini** is a comprehensive women's health and wellness platform designed to empower women with knowledge, tools, and resources for their health journey. From period tracking to pregnancy care, mental wellness to nutrition guidance, Aarogini is your trusted companion for holistic health management.
-
-### 🎯 Mission
-To provide accessible, reliable, and personalized health information and tools that support women at every stage of their health journey.
-
----
-
-## ✨ Features
-
-### 🏠 Core Features
-- **Health Dashboard** - Personalized health metrics and insights
-- **Period & Ovulation Tracker** - Smart menstrual cycle tracking
-- **Pregnancy & Maternal Care** - Comprehensive pregnancy guidance
-- **Mental Wellness Support** - Tools for managing stress and anxiety
-- **Nutrition Guidance** - Personalized diet plans and recipes
-- **Medicine Reminders** - Never miss your medications
-- **Expert Consultation** - Connect with healthcare professionals
-- **Community Support** - Share experiences and get support
-
-### 🎨 UI/UX Features
-- **Glassmorphism Design** - Modern, elegant interface
-- **Smooth Animations** - Hardware-accelerated for 60fps performance
-- **Responsive Layout** - Works seamlessly on all devices
-- **Fixed Transparent Header** - Always accessible navigation
-- **Infinite Article Slider** - Continuous content browsing
-- **Interactive Health Journey** - 21 comprehensive health topics
-- **Sliding Menu & Profile Panels** - Intuitive navigation
-
-### 📊 Health Tracking
-Track and manage 21+ health topics including:
-- 🩸 Periods & Ovulation
-- 🔬 PCOS/PCOD
-- 💢 Endometriosis
-- 🤰 Pregnancy & Maternal Health
-- 👶 Postpartum Health
-- 🌡️ Menopause
-- 💭 Mental Health
-- 💉 Anemia & Nutrition
-- ❤️ Cardiovascular Health
-- And many more...
+- Health dashboard with personalized insights
+- Period and ovulation tracking
+- Health condition guidance (e.g., PCOS, endometriosis)
+- Medical report management and analysis
+- AI‑assisted recommendations and summaries
+- Nutrition and medicine guidance
+- Responsive, modern UI
 
 ---
 
-## 🛠️ Tech Stack
+## Architecture
 
-### Frontend
-- **React 19.1.1** - Modern React with functional components and hooks
-- **Vite 7.1.7** - Lightning-fast build tool and dev server
-- **Tailwind CSS 4.1.16** - Utility-first CSS framework
-- **ESLint** - Code quality and consistency
-
-### Backend
-- **Node.js** - JavaScript runtime
-- **Express.js** - Web application framework
-
-### Development Tools
-- **Git** - Version control
-- **npm/yarn** - Package management
-- **VS Code** - Recommended IDE
+- **frontend/**: React + Vite + Tailwind UI
+- **backend/**: Express API, MongoDB, JWT authentication
+- **ml-service/**: Optional Python service for ML workflows
 
 ---
 
-## 📁 Project Structure
+## Tech Stack
+
+**Frontend**: React, Vite, Tailwind CSS, Axios
+
+**Backend**: Node.js, Express, MongoDB, Mongoose, JWT
+
+**ML (optional)**: Python, FastAPI (uvicorn)
+
+---
+
+## Project Structure
 
 ```
 Aarogini/
-├── frontend/
-│   ├── public/
-│   │   ├── logo without bg.png
-│   │   └── women.jpg
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── background/
-│   │   │   │   └── AnimatedBackground.jsx
-│   │   │   ├── icons/
-│   │   │   │   ├── FeatureIcons.jsx
-│   │   │   │   ├── HealthIcons.jsx
-│   │   │   │   ├── MenuIcon.jsx
-│   │   │   │   └── UserIcon.jsx
-│   │   │   ├── layout/
-│   │   │   │   ├── Header.jsx
-│   │   │   │   ├── MenuPanel.jsx
-│   │   │   │   └── ProfilePanel.jsx
-│   │   │   └── sections/
-│   │   │       ├── ArticlesSlider.jsx
-│   │   │       ├── FeatureCards.jsx
-│   │   │       ├── HealthJourney.jsx
-│   │   │       └── HeroSection.jsx
-│   │   ├── App.jsx
-│   │   ├── App.css
-│   │   ├── main.jsx
-│   │   └── index.css
-│   ├── package.json
-│   ├── vite.config.js
-│   ├── tailwind.config.js
-│   └── eslint.config.js
-├── backend/
-│   ├── index.js
-│   └── package.json
-├── README.md
-└── .gitignore
+  backend/
+  frontend/
+  ml-service/
+  README.md
 ```
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-Before you begin, ensure you have the following installed:
-- **Node.js** (v18 or higher)
-- **npm** (v9 or higher) or **yarn**
-- **Git**
+- Node.js 18+
+- npm 9+ (or yarn/pnpm)
+- Python 3.10+ (optional for ML service)
 
-### System Requirements
-- OS: Windows 10+, macOS 10.15+, or Linux
-- RAM: 4GB minimum (8GB recommended)
-- Disk Space: 500MB free space
+### Setup
 
----
+1) Install dependencies
 
-## 💻 Installation
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Akshayguleria22/Aarogini.git
-cd Aarogini
 ```
-
-### 2. Install Frontend Dependencies
-
-```bash
 cd frontend
 npm install
-```
 
-### 3. Install Backend Dependencies
-
-```bash
 cd ../backend
 npm install
 ```
 
----
+2) Configure environment variables
 
-## 🎮 Usage
+Copy the sample file and fill in values:
 
-### Development Mode
+```
+backend/.env.example → backend/.env
+```
 
-#### Start Frontend (Vite Dev Server)
-```bash
+### Environment Variables (backend/.env)
+
+- `MONGODB_URI`: MongoDB connection string
+- `JWT_SECRET`: JWT secret key
+- `JWT_EXPIRE`: Token expiry (e.g., `30d`)
+- `CLIENT_URL`: Frontend URL for CORS (e.g., `http://localhost:5173`)
+- `GROQ_API_KEY`, `OPENFDA_API_KEY`, `GNEWS_API_KEY`: Optional external APIs
+- `ML_BASE_URL`: Optional ML service base URL
+
+### Run Locally
+
+Frontend:
+
+```
 cd frontend
 npm run dev
 ```
-The frontend will be available at: `http://localhost:5173`
 
-#### Start Backend
-```bash
-cd backend
-npm start
+Backend:
+
 ```
-The backend will be available at: `http://localhost:5000`
+cd backend
+npm run dev
+```
 
-#### Start ML Service (Optional but recommended)
-```bash
+Optional ML service:
+
+```
 cd ml-service
 pip install -r requirements.txt
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
-The ML service will be available at: `http://localhost:8000`
-
-### Production Build
-
-#### Build Frontend
-```bash
-cd frontend
-npm run build
-```
-
-#### Preview Production Build
-```bash
-npm run preview
-```
-
-### Linting
-```bash
-cd frontend
-npm run lint
-```
 
 ---
 
-## 🧩 Components
+## API
 
-### Layout Components
-- **Header** - Fixed transparent navigation with glassmorphism
-- **MenuPanel** - Sliding side panel with 12 navigation items
-- **ProfilePanel** - User profile with health stats and quick actions
-
-### Section Components
-- **HeroSection** - Main landing section with tagline
-- **ArticlesSlider** - Infinite scrolling article cards with images
-- **FeatureCards** - 4 main feature cards with hover effects
-- **HealthJourney** - Scrollable health topics with progress tracking
-
-### Background Components
-- **AnimatedBackground** - Decorative elements with smooth animations
-
-### Icon Components
-- **FeatureIcons** - SVG icons for main features
-- **HealthIcons** - Emoji-based health topic icons
-- **MenuIcon & UserIcon** - Header navigation icons
+- Base URL: `http://localhost:5000/api`
+- Auth routes: `/auth/register`, `/auth/login`, `/auth/me`
 
 ---
 
-## 🎨 Design System
+## Deployment Notes
 
-### Color Palette
-- **Primary Purple**: `#9333ea` → `#c026d3`
-- **Primary Pink**: `#ec4899` → `#f43f5e`
-- **Background Gradient**: `#F8F7FC` → `#EDE7F6` → `#E8DFF5`
-- **Text**: `#3B3A60` (dark purple-gray)
+- Ensure `CLIENT_URL` is set to your deployed frontend URL.
+- If deploying frontend and backend on different domains, add the frontend domain to CORS allowlist in [backend/index.js](backend/index.js).
 
-### Animations
-- **Article Slider**: 25s infinite loop
-- **Fade-in**: 0.6s ease
+---
+
+## Troubleshooting
+
+- **401 Unauthorized**: Token missing/expired. Login again and ensure the token is saved.
+- **503 Database unavailable**: MongoDB is not connected. Check `MONGODB_URI`.
+- **CORS blocked**: Ensure the frontend domain is included in backend CORS allowlist.
+
+---
+
+## Contributing
+
+Contributions are welcome. Please open an issue or submit a pull request.
+
+---
+
+## License
+
+Specify your license here.
 - **Hover Effects**: 200-300ms transitions
 - **GPU Accelerated**: All transforms use `translate3d`
 
