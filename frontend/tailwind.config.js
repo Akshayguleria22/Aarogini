@@ -53,7 +53,8 @@ export default {
         '2xl': '1.5rem',
       },
       fontFamily: {
-        'poppins': ['Poppins', 'sans-serif'],
+        display: ['Fraunces', 'serif'],
+        sans: ['Manrope', 'sans-serif'],
       },
       keyframes: {
         "accordion-down": {

@@ -39,8 +39,14 @@ const PeriodTracker = ({ onClose }) => {
         
         if (response.success && response.data) {
           const formattedData = {}
+          const toValidDate = (value) => {
+            const d = new Date(value)
+            return Number.isNaN(d.getTime()) ? null : d
+          }
+
           response.data.forEach(period => {
-            const start = new Date(period.cycleStartDate)
+            const start = toValidDate(period.cycleStartDate)
+            if (!start) return
             const length = Number(period.periodLength || 5)
             for (let i = 0; i < length; i += 1) {
               const d = new Date(start)
@@ -59,17 +65,29 @@ const PeriodTracker = ({ onClose }) => {
           setPeriodData(formattedData)
           // compute latest start and defaults
           if (response.data.length > 0) {
-            const latest = response.data.reduce((a, b) => new Date(a.cycleStartDate) > new Date(b.cycleStartDate) ? a : b)
-            setLastCycleStart(new Date(latest.cycleStartDate))
-            setCurrentPeriodId(latest._id)
-            if (latest.cycleLength) setCycleLength(latest.cycleLength)
-            if (latest.periodLength) setPeriodLength(latest.periodLength)
+            const latest = response.data
+              .map(item => ({ item, date: toValidDate(item.cycleStartDate) }))
+              .filter(entry => entry.date)
+              .reduce((a, b) => (a.date > b.date ? a : b), null)
+            if (latest?.item) {
+              setLastCycleStart(latest.date)
+              setCurrentPeriodId(latest.item._id)
+              if (latest.item.cycleLength) setCycleLength(latest.item.cycleLength)
+              if (latest.item.periodLength) setPeriodLength(latest.item.periodLength)
+            }
           }
         }
       } catch (error) {
         console.error('Error loading period data:', error)
         const localData = localStorage.getItem('periodData')
-        if (localData) setPeriodData(JSON.parse(localData))
+        if (localData) {
+          try {
+            const parsed = JSON.parse(localData)
+            setPeriodData(parsed && typeof parsed === 'object' ? parsed : {})
+          } catch {
+            setPeriodData({})
+          }
+        }
       } finally {
         setLoading(false)
       }
@@ -404,11 +422,11 @@ const PeriodTracker = ({ onClose }) => {
 
   // Hygiene tips
   const hygieneTips = [
-    { tip: 'Change pad/tampon every 4-6 hours', color: 'from-pink-400 to-rose-400' },
-    { tip: 'Take warm showers to ease cramps', color: 'from-purple-400 to-pink-400' },
+    { tip: 'Change pad/tampon every 4-6 hours', color: 'from-orange-400 to-amber-400' },
+    { tip: 'Take warm showers to ease cramps', color: 'from-emerald-400 to-amber-400' },
     { tip: 'Stay hydrated - drink 8-10 glasses of water', color: 'from-blue-400 to-cyan-400' },
-    { tip: 'Light exercise can reduce cramps', color: 'from-indigo-400 to-purple-400' },
-    { tip: 'Get 7-8 hours of sleep', color: 'from-violet-400 to-purple-400' },
+    { tip: 'Light exercise can reduce cramps', color: 'from-sky-400 to-emerald-400' },
+    { tip: 'Get 7-8 hours of sleep', color: 'from-teal-400 to-emerald-400' },
     { tip: 'Eat iron-rich foods (spinach, lean meat)', color: 'from-green-400 to-emerald-400' }
   ]
 
@@ -427,9 +445,9 @@ const PeriodTracker = ({ onClose }) => {
           <div className="flex items-center justify-between bg-white dark:bg-zinc-900 rounded-xl shadow-md p-3">
             <button
               onClick={handleBackToCalendar}
-              className="flex items-center space-x-2 px-3 py-1.5 bg-purple-100 hover:bg-purple-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-lg transition-all duration-300"
+              className="flex items-center space-x-2 px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-lg transition-all duration-300"
             >
-              <svg className="w-4 h-4 text-purple-600 dark:text-pink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-emerald-700 dark:text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               <span className="text-sm text-gray-700 dark:text-zinc-200 font-semibold">Back</span>
@@ -440,7 +458,7 @@ const PeriodTracker = ({ onClose }) => {
           </div>
 
           {/* Period Started Header */}
-          <div className="bg-linear-to-r from-pink-500 to-purple-600 rounded-xl p-4 text-white shadow-lg">
+          <div className="bg-linear-to-r from-emerald-500 to-orange-500 rounded-xl p-4 text-white shadow-lg">
             <h2 className="text-xl font-bold">Period Started</h2>
             <p className="text-xs text-white/90">Track your symptoms every 3 hours</p>
           </div>
@@ -450,8 +468,8 @@ const PeriodTracker = ({ onClose }) => {
             <div className="overflow-x-auto h-full">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-linear-to-r from-purple-100 to-pink-100 dark:from-zinc-900 dark:to-zinc-800">
-                    <th className="px-3 py-1.5 text-left font-bold text-gray-800 dark:text-zinc-100 sticky left-0 bg-purple-100 dark:bg-zinc-900 text-xs">
+                  <tr className="bg-linear-to-r from-emerald-100 to-amber-100 dark:from-zinc-900 dark:to-zinc-800">
+                    <th className="px-3 py-1.5 text-left font-bold text-gray-800 dark:text-zinc-100 sticky left-0 bg-emerald-100 dark:bg-zinc-900 text-xs">
                       Symptoms
                     </th>
                     {dayIndices.map((dayIndex) => {
@@ -552,7 +570,7 @@ const PeriodTracker = ({ onClose }) => {
                       'bg-linear-to-r from-yellow-400 to-orange-300',
                       'bg-linear-to-r from-red-400 to-rose-400',
                       'bg-linear-to-r from-blue-400 to-cyan-400',
-                      'bg-linear-to-r from-purple-400 to-pink-400'
+                      'bg-linear-to-r from-emerald-400 to-amber-400'
                     ][index]}`}
                   >
                     <div className="flex flex-col items-center space-y-1">
@@ -572,7 +590,7 @@ const PeriodTracker = ({ onClose }) => {
           <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg p-3 flex-1 overflow-y-auto">
             <h3 className="text-xs font-bold text-gray-800 dark:text-zinc-100 mb-2 flex items-center justify-between">
               <span>Time Slot Entry</span>
-              <span className="text-purple-600 dark:text-pink-300">Day {currentDayIndex + 1} - {TIME_SLOTS[currentTimeSlot]}</span>
+              <span className="text-emerald-700 dark:text-orange-300">Day {currentDayIndex + 1} - {TIME_SLOTS[currentTimeSlot]}</span>
             </h3>
             
             <div className="space-y-3">
@@ -588,7 +606,7 @@ const PeriodTracker = ({ onClose }) => {
                 }
                 
                 return (
-                  <div key={symptom} className="p-2 bg-linear-to-br from-purple-50 to-pink-50 dark:from-zinc-900 dark:to-zinc-800 rounded-lg">
+                  <div key={symptom} className="p-2 bg-linear-to-br from-emerald-50 to-amber-50 dark:from-zinc-900 dark:to-zinc-800 rounded-lg">
                     <div className="font-semibold text-gray-700 dark:text-zinc-200 mb-2 text-xs">{symptom}</div>
                     <div className="space-y-2">
                       {/* Emoji Display with Flow color variation */}
@@ -650,14 +668,14 @@ const PeriodTracker = ({ onClose }) => {
                 <button
                   onClick={() => setCurrentDayIndex(Math.max(0, safeDayIndex - 1))}
                   disabled={safeDayIndex === 0}
-                  className="px-2 py-1.5 text-xs bg-pink-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-pink-600 transition-all duration-300"
+                  className="px-2 py-1.5 text-xs bg-orange-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition-all duration-300"
                 >
                   ← Prev Day
                 </button>
                 <button
                   onClick={() => setCurrentDayIndex(Math.min(totalDays - 1, safeDayIndex + 1))}
                   disabled={safeDayIndex >= totalDays - 1}
-                  className="px-2 py-1.5 text-xs bg-pink-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-pink-600 transition-all duration-300"
+                  className="px-2 py-1.5 text-xs bg-orange-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition-all duration-300"
                 >
                   Next Day →
                 </button>
@@ -666,14 +684,14 @@ const PeriodTracker = ({ onClose }) => {
                 <button
                   onClick={() => setCurrentTimeSlot(Math.max(0, currentTimeSlot - 1))}
                   disabled={currentTimeSlot === 0}
-                  className="px-2 py-1.5 text-xs bg-purple-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-purple-600 transition-all duration-300"
+                  className="px-2 py-1.5 text-xs bg-emerald-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600 transition-all duration-300"
                 >
                   ← Prev Slot
                 </button>
                 <button
                   onClick={() => setCurrentTimeSlot(Math.min(7, currentTimeSlot + 1))}
                   disabled={currentTimeSlot === 7}
-                  className="px-2 py-1.5 text-xs bg-purple-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-purple-600 transition-all duration-300"
+                  className="px-2 py-1.5 text-xs bg-emerald-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600 transition-all duration-300"
                 >
                   Next Slot →
                 </button>
@@ -682,14 +700,14 @@ const PeriodTracker = ({ onClose }) => {
           </div>
 
           {/* Predictions */}
-          <div className="bg-linear-to-br from-purple-100 to-pink-100 dark:from-zinc-900 dark:to-zinc-800 rounded-xl p-3">
+          <div className="bg-linear-to-br from-emerald-100 to-amber-100 dark:from-zinc-900 dark:to-zinc-800 rounded-xl p-3">
             <h4 className="font-bold text-gray-800 dark:text-zinc-100 mb-2 text-xs">
               Predictions
             </h4>
             <div className="space-y-1.5 text-[10px]">
-              <p className="flex justify-between"><span className="text-gray-600 dark:text-zinc-400">Next Period:</span><span className="font-semibold text-purple-700 dark:text-pink-400">{fmt(predictions.nextPeriod)}</span></p>
-              <p className="flex justify-between"><span className="text-gray-600 dark:text-zinc-400">Cycle Length:</span><span className="font-semibold text-purple-700 dark:text-pink-400">{cycleLength} days</span></p>
-              <p className="flex justify-between"><span className="text-gray-600 dark:text-zinc-400">Ovulation:</span><span className="font-semibold text-purple-700 dark:text-pink-400">{fmt(predictions.ovulation)}</span></p>
+              <p className="flex justify-between"><span className="text-gray-600 dark:text-zinc-400">Next Period:</span><span className="font-semibold text-emerald-700 dark:text-orange-400">{fmt(predictions.nextPeriod)}</span></p>
+              <p className="flex justify-between"><span className="text-gray-600 dark:text-zinc-400">Cycle Length:</span><span className="font-semibold text-emerald-700 dark:text-orange-400">{cycleLength} days</span></p>
+              <p className="flex justify-between"><span className="text-gray-600 dark:text-zinc-400">Ovulation:</span><span className="font-semibold text-emerald-700 dark:text-orange-400">{fmt(predictions.ovulation)}</span></p>
             </div>
           </div>
 
@@ -700,10 +718,10 @@ const PeriodTracker = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-6xl h-[88vh] bg-linear-to-br from-pink-50 to-purple-50 dark:from-zinc-950 dark:to-zinc-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-scale-in">
+      <div className="relative w-full max-w-6xl h-[88vh] bg-linear-to-br from-emerald-50 to-amber-50 dark:from-zinc-950 dark:to-zinc-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-scale-in">
         
         {/* Header */}
-  <div className="bg-linear-to-r from-pink-500 to-purple-600 p-3 text-white">
+        <div className="bg-linear-to-r from-emerald-500 to-orange-500 p-3 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
@@ -739,9 +757,9 @@ const PeriodTracker = ({ onClose }) => {
                   <div className="flex items-center justify-between mb-3">
                     <button
                       onClick={previousMonth}
-                        className="w-8 h-8 rounded-full bg-purple-100 hover:bg-purple-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-all duration-300 flex items-center justify-center"
+                        className="w-8 h-8 rounded-full bg-emerald-100 hover:bg-emerald-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-all duration-300 flex items-center justify-center"
                     >
-                        <svg className="w-4 h-4 text-purple-600 dark:text-pink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-emerald-700 dark:text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
                     </button>
@@ -750,9 +768,9 @@ const PeriodTracker = ({ onClose }) => {
                     </h3>
                     <button
                       onClick={nextMonth}
-                        className="w-8 h-8 rounded-full bg-purple-100 hover:bg-purple-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-all duration-300 flex items-center justify-center"
+                        className="w-8 h-8 rounded-full bg-emerald-100 hover:bg-emerald-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-all duration-300 flex items-center justify-center"
                     >
-                        <svg className="w-4 h-4 text-purple-600 dark:text-pink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-emerald-700 dark:text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </button>
@@ -788,7 +806,7 @@ const PeriodTracker = ({ onClose }) => {
                           key={day}
                           className={`w-9 h-9 rounded-md cursor-pointer transition-all duration-300 flex items-center justify-center relative ${
                             isToday 
-                              ? 'bg-linear-to-br from-purple-500 to-pink-500 shadow-md scale-105'
+                            ? 'bg-linear-to-br from-emerald-500 to-orange-500 shadow-md scale-105'
                               : dayData?.isPeriod
                               ? 'bg-red-500'
                               : dayData?.type === 'pre-symptoms' 
@@ -812,14 +830,14 @@ const PeriodTracker = ({ onClose }) => {
 
                   {/* Date Selection Options */}
                   {selectedDate && (
-                      <div className="mt-3 p-3 bg-linear-to-r from-purple-50 to-pink-50 dark:from-zinc-900 dark:to-zinc-800 rounded-lg animate-fade-in">
+                      <div className="mt-3 p-3 bg-linear-to-r from-emerald-50 to-amber-50 dark:from-zinc-900 dark:to-zinc-800 rounded-lg animate-fade-in">
                         <p className="text-xs font-semibold text-gray-700 dark:text-zinc-200 mb-2">
                         {monthNames[month]} {selectedDate}, {year}
                       </p>
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={handlePeriodStart}
-                          className="p-2 bg-linear-to-r from-red-400 to-pink-500 text-white rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col items-center space-y-1"
+                            className="p-2 bg-linear-to-r from-red-400 to-orange-500 text-white rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col items-center space-y-1"
                         >
                             <div className="w-3 h-3 rounded-full bg-white/90"></div>
                           <span className="text-[10px]">Period Started</span>
@@ -848,7 +866,7 @@ const PeriodTracker = ({ onClose }) => {
                         <span className="text-gray-700 dark:text-zinc-200">Pre-Symptoms</span>
                     </div>
                     <div className="flex items-center space-x-1.5">
-                      <div className="w-2.5 h-2.5 rounded bg-linear-to-br from-purple-500 to-pink-500"></div>
+                        <div className="w-2.5 h-2.5 rounded bg-linear-to-br from-emerald-500 to-orange-500"></div>
                         <span className="text-gray-700 dark:text-zinc-200">Today</span>
                     </div>
                   </div>
@@ -879,34 +897,34 @@ const PeriodTracker = ({ onClose }) => {
               <div className="lg:col-span-3 overflow-y-auto">
                 <div className="space-y-3 h-full">
                   {/* Predictions Card */}
-                    <div className="bg-linear-to-br from-purple-100 to-pink-100 dark:from-zinc-900 dark:to-zinc-800 rounded-xl p-3">
+                    <div className="bg-linear-to-br from-emerald-100 to-amber-100 dark:from-zinc-900 dark:to-zinc-800 rounded-xl p-3">
                       <h4 className="font-bold text-gray-800 dark:text-zinc-100 mb-3 text-xs">
                         Cycle Predictions
                     </h4>
                     <div className="grid grid-cols-2 gap-2 text-[10px]">
                         <div className="bg-white/60 dark:bg-zinc-900/60 rounded-lg p-2.5">
                           <p className="text-gray-600 dark:text-zinc-400 font-medium mb-1">Next Period:</p>
-                          <p className="font-bold text-purple-700 dark:text-pink-400 text-xs">{fmt(predictions.nextPeriod)}</p>
+                          <p className="font-bold text-emerald-700 dark:text-orange-400 text-xs">{fmt(predictions.nextPeriod)}</p>
                       </div>
                         <div className="bg-white/60 dark:bg-zinc-900/60 rounded-lg p-2.5">
                           <p className="text-gray-600 dark:text-zinc-400 font-medium mb-1">Cycle Length:</p>
-                          <p className="font-bold text-purple-700 dark:text-pink-400 text-xs">{cycleLength} days</p>
+                          <p className="font-bold text-emerald-700 dark:text-orange-400 text-xs">{cycleLength} days</p>
                         </div>
                         <div className="bg-white/60 dark:bg-zinc-900/60 rounded-lg p-2.5">
                           <p className="text-gray-600 dark:text-zinc-400 font-medium mb-1">Ovulation:</p>
-                          <p className="font-bold text-purple-700 dark:text-pink-400 text-xs">{fmt(predictions.ovulation)}</p>
+                          <p className="font-bold text-emerald-700 dark:text-orange-400 text-xs">{fmt(predictions.ovulation)}</p>
                         </div>
                         <div className="bg-white/60 dark:bg-zinc-900/60 rounded-lg p-2.5">
                           <p className="text-gray-600 dark:text-zinc-400 font-medium mb-1">Period Duration:</p>
-                          <p className="font-bold text-purple-700 dark:text-pink-400 text-xs">{periodLength} days</p>
+                          <p className="font-bold text-emerald-700 dark:text-orange-400 text-xs">{periodLength} days</p>
                       </div>
                         <div className="bg-white/60 dark:bg-zinc-900/60 rounded-lg p-2.5">
                           <p className="text-gray-600 dark:text-zinc-400 font-medium mb-1">Fertile Window:</p>
-                          <p className="font-bold text-purple-700 dark:text-pink-400 text-xs">{predictions.fertile ? `${new Date(predictions.fertile.from).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(predictions.fertile.to).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : '—'}</p>
+                          <p className="font-bold text-emerald-700 dark:text-orange-400 text-xs">{predictions.fertile ? `${new Date(predictions.fertile.from).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(predictions.fertile.to).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : '—'}</p>
                       </div>
                         <div className="bg-white/60 dark:bg-zinc-900/60 rounded-lg p-2.5">
                           <p className="text-gray-600 dark:text-zinc-400 font-medium mb-1">Cycle Day:</p>
-                          <p className="font-bold text-purple-700 dark:text-pink-400 text-xs">{predictions.cycleDay ? `Day ${predictions.cycleDay} of ${cycleLength}` : `— of ${cycleLength}`}</p>
+                          <p className="font-bold text-emerald-700 dark:text-orange-400 text-xs">{predictions.cycleDay ? `Day ${predictions.cycleDay} of ${cycleLength}` : `— of ${cycleLength}`}</p>
                       </div>
                     </div>
                   </div>

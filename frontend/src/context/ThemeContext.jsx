@@ -15,7 +15,7 @@ export const useTheme = () => {
 export const ThemeProvider = ({ children }) => {
   const [mode, setMode] = useState(() => {
     const savedMode = localStorage.getItem('themeMode')
-    return savedMode || 'dark' // Default to dark
+    return savedMode || 'light'
   })
 
   useEffect(() => {
@@ -39,24 +39,24 @@ export const ThemeProvider = ({ children }) => {
             ? {
                 // Light mode
                 primary: {
-                  main: '#E91E63', // Pink for women's health
-                  light: '#F06292',
-                  dark: '#C2185B',
+                  main: '#2bb3a2',
+                  light: '#4fc7b8',
+                  dark: '#1f9f90',
                   contrastText: '#fff',
                 },
                 secondary: {
-                  main: '#9C27B0', // Purple
-                  light: '#BA68C8',
-                  dark: '#7B1FA2',
+                  main: '#f47c6b',
+                  light: '#f79a8e',
+                  dark: '#e66555',
                   contrastText: '#fff',
                 },
                 background: {
-                  default: '#F8F9FA',
-                  paper: '#FFFFFF',
+                  default: '#f7f3ee',
+                  paper: '#ffffff',
                 },
                 text: {
-                  primary: '#1A1A1A',
-                  secondary: '#666666',
+                  primary: '#1f2a2e',
+                  secondary: '#5f6b6f',
                 },
                 success: {
                   main: '#4CAF50',
@@ -74,24 +74,24 @@ export const ThemeProvider = ({ children }) => {
             : {
                 // Dark mode
                 primary: {
-                  main: '#F06292', // Lighter pink for dark mode
-                  light: '#F48FB1',
-                  dark: '#E91E63',
+                  main: '#2bb3a2',
+                  light: '#4fc7b8',
+                  dark: '#1f9f90',
                   contrastText: '#000',
                 },
                 secondary: {
-                  main: '#BA68C8', // Lighter purple
-                  light: '#CE93D8',
-                  dark: '#9C27B0',
+                  main: '#f47c6b',
+                  light: '#f79a8e',
+                  dark: '#e66555',
                   contrastText: '#000',
                 },
                 background: {
-                  default: '#121212',
-                  paper: '#1E1E1E',
+                  default: '#0f1515',
+                  paper: '#182022',
                 },
                 text: {
-                  primary: '#FFFFFF',
-                  secondary: '#B0B0B0',
+                  primary: '#fdf6ef',
+                  secondary: '#c9c3ba',
                 },
                 success: {
                   main: '#66BB6A',
@@ -108,36 +108,42 @@ export const ThemeProvider = ({ children }) => {
               }),
         },
         typography: {
-          fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+          fontFamily: '"Manrope", sans-serif',
           h1: {
             fontSize: '2.5rem',
             fontWeight: 700,
             lineHeight: 1.2,
+            fontFamily: '"Fraunces", serif',
           },
           h2: {
             fontSize: '2rem',
             fontWeight: 600,
             lineHeight: 1.3,
+            fontFamily: '"Fraunces", serif',
           },
           h3: {
             fontSize: '1.75rem',
             fontWeight: 600,
             lineHeight: 1.4,
+            fontFamily: '"Fraunces", serif',
           },
           h4: {
             fontSize: '1.5rem',
             fontWeight: 500,
             lineHeight: 1.4,
+            fontFamily: '"Fraunces", serif',
           },
           h5: {
             fontSize: '1.25rem',
             fontWeight: 500,
             lineHeight: 1.5,
+            fontFamily: '"Fraunces", serif',
           },
           h6: {
             fontSize: '1rem',
             fontWeight: 500,
             lineHeight: 1.6,
+            fontFamily: '"Fraunces", serif',
           },
           body1: {
             fontSize: '1rem',

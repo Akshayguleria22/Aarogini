@@ -23,6 +23,9 @@ ${JSON.stringify(data.report, null, 2)}
 ML Prediction Results:
 ${JSON.stringify(data.ml, null, 2)}
 
+Previous Report Comparison:
+${JSON.stringify(data.comparison || null, null, 2)}
+
 Your Tasks:
 1. **Risk Assessment**: Analyze all test results and calculate an overall risk score (0-100)
 2. **Condition Detection**: Identify any medical conditions, deficiencies, or abnormalities
@@ -167,25 +170,27 @@ export async function chatFlow({ message, userContext = '', conversationHistory 
   const systemPrompt = `You are ChatVeda, Aarogini's compassionate women's health AI assistant.
 
 Your capabilities:
-- Provide personalized health advice based on user's medical history and current health status
-- Answer questions about menstrual health, pregnancy, PCOS, hormonal issues, and general wellness
-- Explain medical test results in simple, easy-to-understand language
-- Suggest lifestyle modifications, diet plans, and exercise routines
+- Provide personalized health guidance based on the user's history and current context
+- Answer questions about menstrual health, pregnancy, PCOS, hormones, mental wellness, and general health
+- Explain test results in simple language
+- Suggest practical lifestyle and diet steps
 - Provide emotional support and encouragement
 
 Guidelines:
-- Be concise: 2-4 short sentences max
+- Be clear and helpful: aim for 6-10 sentences; longer is ok when needed
+- Use short paragraphs or bullet points for readability
 - Do NOT assume the user's gender, identity, or who the question is for
-- Never say the user is "not experiencing" a topic; avoid partner/family assumptions
-- Keep tone supportive, confident, and Aarogini-aligned
-- When relevant, suggest an Aarogini feature (period tracker, report analyzer, insights) briefly
+- Avoid partner/family assumptions and avoid stating what the user is "not experiencing"
+- Keep the tone supportive, confident, and Aarogini-aligned
+- When relevant, suggest an Aarogini feature briefly (period tracker, report analyzer, insights)
 - Avoid mentioning other services or competitors
-- If serious/urgent, recommend seeing a healthcare provider in one short line
+- If the situation sounds serious or urgent, recommend seeing a healthcare provider in one short line
+- If info is missing, ask one concise clarifying question at the end
 
 ${userContext ? `\nUser Context:\n${userContext}\n` : ''}
 ${conversationHistory ? `\nRecent Conversation:\n${conversationHistory}\n` : ''}
 
-Remember: You have access to the user's health profile, so make responses specific to their situation and keep them brief.`;
+Remember: You have access to the user's health profile, so make responses specific and actionable.`;
 
   const userPrompt = message;
 
@@ -205,7 +210,7 @@ Remember: You have access to the user's health profile, so make responses specif
         { role: 'user', content: userPrompt }
       ],
       temperature: 0.4,
-      max_tokens: 350
+      max_tokens: 700
     });
     
     const content = completion.choices[0].message.content;
@@ -289,6 +294,10 @@ Return STRICT JSON:
 }
 `;
 
+  if (!groq) {
+    return { possibleConditions: [], severity: "", recommendations: [], tests: [], redFlags: [], mentalSupport: "" };
+  }
+
   const completion = await groq.chat.completions.create({
     model: "llama-3.3-70b-versatile",
     messages: [
@@ -311,4 +320,60 @@ export async function compareReportsFlow({ reports, profile = {}, ml = {} } = {}
   // Combine reports into a single context for comparison
   const combined = Array.isArray(reports) ? reports.map(r => (typeof r === 'string' ? r : r.text || '')).join('\n\n') : String(reports || '');
   return analyzeWithGroq({ profile, report: { combinedReports: combined }, ml });
+}
+
+export async function extractLabTestsWithGroq(reportText = '') {
+  if (!groq) {
+    return { ok: false, tests: [], error: 'GROQ_API_KEY not set' };
+  }
+
+  const prompt = `
+You are a medical report parser. Extract ONLY lab test results from the text below.
+
+Return STRICT JSON ONLY as an array of objects with these keys:
+- test_name (string)
+- value (string or number)
+- unit (string, empty if unknown)
+- reference_range (string, empty if unknown)
+- flag (string: "H", "L", or "" if not shown)
+
+Rules:
+- Include only tests with a numeric value.
+- If multiple values are listed for the same test, output separate items.
+- Do not include any commentary or extra fields.
+
+Report Text:
+${String(reportText || '').slice(0, 8000)}
+`;
+
+  try {
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        { role: "system", content: "You extract lab tests and return JSON only. No markdown." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0,
+      max_tokens: 1200
+    });
+
+    const raw = completion.choices[0].message.content || '';
+    const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+    let parsed = null;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch {
+      const start = cleaned.indexOf('[');
+      const end = cleaned.lastIndexOf(']');
+      if (start !== -1 && end !== -1) {
+        parsed = JSON.parse(cleaned.slice(start, end + 1));
+      }
+    }
+
+    const tests = Array.isArray(parsed) ? parsed : [];
+    return { ok: true, tests };
+  } catch (e) {
+    return { ok: false, tests: [], error: e.message };
+  }
 }

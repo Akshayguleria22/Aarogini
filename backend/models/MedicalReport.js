@@ -50,7 +50,7 @@ const medicalReportSchema = new mongoose.Schema({
   extractedText: {
     type: String
   },
-  // AI Analysis results from Gemini
+  // AI Analysis results from Groq
   analysis: {
     patient_info: {
       name: String,
@@ -72,6 +72,8 @@ const medicalReportSchema = new mongoose.Schema({
     abnormal_findings: [{
       test: String,
       value: String,
+      normalRange: String,
+      explanation: String,
       concern: String,
       severity: {
         type: String,

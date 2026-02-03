@@ -1,13 +1,26 @@
 import express from 'express';
+import mongoose from 'mongoose';
 const router = express.Router();
 import User from '../models/User.js';
 import { protect } from '../middleware/auth.js';
+
+const ensureDatabaseConnection = (res) => {
+  if (mongoose.connection.readyState !== 1) {
+    res.status(503).json({
+      success: false,
+      message: 'Database unavailable. Please try again later.'
+    });
+    return false;
+  }
+  return true;
+};
 
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
 router.post('/register', async (req, res) => {
   try {
+    if (!ensureDatabaseConnection(res)) return;
     const { name, email, password, phone, dateOfBirth } = req.body;
 
     // Check if user already exists
@@ -57,6 +70,7 @@ router.post('/register', async (req, res) => {
 // @access  Public
 router.post('/login', async (req, res) => {
   try {
+    if (!ensureDatabaseConnection(res)) return;
     const { email, password } = req.body;
 
     // Validate email & password
@@ -117,6 +131,7 @@ router.post('/login', async (req, res) => {
 // @access  Private
 router.get('/me', protect, async (req, res) => {
   try {
+    if (!ensureDatabaseConnection(res)) return;
     const user = await User.findById(req.user.id);
 
     res.status(200).json({

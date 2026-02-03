@@ -39,25 +39,22 @@ const Footer = () => {
   ]
 
   return (
-    <footer className="relative z-10 mt-auto bg-gradient-to-br from-zinc-900/95 to-zinc-800/95 backdrop-blur-xl text-white">
-      {/* Main Footer Content */}
+    <footer className="relative z-10 mt-auto bg-gradient-to-br from-[#142022] via-[#1f2a2e] to-[#0f1516] text-[#fdf6ef]">
       <div className="px-8 py-12">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
-            {/* Brand Section */}
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4">
-                <img 
-                  src="/logooo.png" 
-                  alt="Aarogini Logo" 
+                <img
+                  src="/logooo.png"
+                  alt="Aarogini Logo"
                   className="size-12"
                 />
                 <h3 className="text-2xl font-bold">Aarogini</h3>
               </div>
-              <p className="text-zinc-200 text-sm leading-relaxed mb-4">
-                Aarogini is a women’s health platform that brings period tracking, report analysis, and wellness guidance into one secure place.
+              <p className="text-[#d7d1c8] text-sm leading-relaxed mb-4">
+                Aarogini brings period tracking, report analysis, and wellness guidance into one secure place.
               </p>
-              {/* Social Links */}
               <div className="flex gap-3">
                 {socialLinks.map((social, index) => (
                   <a
@@ -72,7 +69,6 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* Links Sections */}
             <div>
               <h4 className="text-lg font-semibold mb-4">About</h4>
               <ul className="space-y-2">
@@ -80,7 +76,7 @@ const Footer = () => {
                   <li key={index}>
                     <a
                       href={link.href}
-                      className="text-purple-200 hover:text-white transition-colors duration-200 text-sm"
+                      className="text-[#f6ad55] hover:text-white transition-colors duration-200 text-sm"
                     >
                       {link.label}
                     </a>
@@ -96,7 +92,7 @@ const Footer = () => {
                   <li key={index}>
                     <a
                       href={link.href}
-                      className="text-purple-200 hover:text-white transition-colors duration-200 text-sm"
+                      className="text-[#f6ad55] hover:text-white transition-colors duration-200 text-sm"
                     >
                       {link.label}
                     </a>
@@ -112,7 +108,7 @@ const Footer = () => {
                   <li key={index}>
                     <a
                       href={link.href}
-                      className="text-purple-200 hover:text-white transition-colors duration-200 text-sm"
+                      className="text-[#f6ad55] hover:text-white transition-colors duration-200 text-sm"
                     >
                       {link.label}
                     </a>
@@ -128,7 +124,7 @@ const Footer = () => {
                   <li key={index}>
                     <a
                       href={link.href}
-                      className="text-purple-200 hover:text-white transition-colors duration-200 text-sm"
+                      className="text-[#f6ad55] hover:text-white transition-colors duration-200 text-sm"
                     >
                       {link.label}
                     </a>
@@ -138,48 +134,46 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Newsletter Section */}
           <div className="border-t border-white/10 pt-8 mb-8">
             <div className="max-w-md">
               <h4 className="text-lg font-semibold mb-3">Stay in the loop</h4>
-              <p className="text-zinc-200 text-sm mb-4">
-                Subscribe for product updates, women’s health resources, and new feature announcements.
+              <p className="text-[#d7d1c8] text-sm mb-4">
+                Subscribe for product updates, women's health resources, and new feature announcements.
               </p>
               <div className="flex gap-2">
                 <div className="flex-1 flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 border border-white/10">
-                  <Mail className="w-4 h-4 text-zinc-200" />
+                  <Mail className="w-4 h-4 text-[#d7d1c8]" />
                   <input
                     type="email"
                     placeholder="Enter your email"
-                    className="w-full bg-transparent text-sm text-white placeholder-zinc-400 focus:outline-none"
+                    className="w-full bg-transparent text-sm text-white placeholder-[#c9c3ba] focus:outline-none"
                   />
                 </div>
-                <button className="px-6 py-2 bg-white text-zinc-900 rounded-lg font-semibold hover:bg-zinc-100 transition-colors duration-200">
+                <button className="px-6 py-2 bg-[#f47c6b] text-white rounded-lg font-semibold hover:bg-[#f68d7f] transition-colors duration-200">
                   Subscribe
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Bottom Bar */}
           <div className="border-t border-white/10 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-zinc-300 text-sm">
-                © {currentYear} Aarogini. All rights reserved.
+              <p className="text-[#c9c3ba] text-sm">
+                Copyright {currentYear} Aarogini. All rights reserved.
               </p>
               <div className="flex items-center gap-6">
-                <a href="#privacy" className="text-zinc-300 hover:text-white text-sm transition-colors">
+                <a href="#privacy" className="text-[#c9c3ba] hover:text-white text-sm transition-colors">
                   Privacy
                 </a>
-                <a href="#terms" className="text-zinc-300 hover:text-white text-sm transition-colors">
+                <a href="#terms" className="text-[#c9c3ba] hover:text-white text-sm transition-colors">
                   Terms
                 </a>
-                <a href="#cookies" className="text-zinc-300 hover:text-white text-sm transition-colors">
+                <a href="#cookies" className="text-[#c9c3ba] hover:text-white text-sm transition-colors">
                   Cookies
                 </a>
               </div>
-              <p className="text-zinc-300 text-sm">
-                Built for women’s health and long-term wellness
+              <p className="text-[#c9c3ba] text-sm">
+                Built for women's health and long-term wellness
               </p>
             </div>
           </div>

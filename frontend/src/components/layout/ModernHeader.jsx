@@ -68,12 +68,12 @@ const ModernHeader = ({ onMenuClick }) => {
       position="sticky"
       elevation={0}
       sx={{
-        background: mode === 'light' 
-          ? 'linear-gradient(135deg, #f4f4f5 0%, #e4e4e7 100%)'
-          : 'linear-gradient(135deg, #18181b 0%, #27272a 100%)',
+        background: mode === 'light'
+          ? 'linear-gradient(135deg, #f8f4ef 0%, #efe7df 100%)'
+          : 'linear-gradient(135deg, #0f1a1a 0%, #162020 100%)',
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid',
-        borderColor: mode === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+        borderColor: mode === 'light' ? 'rgba(15, 23, 28, 0.08)' : 'rgba(255, 255, 255, 0.08)',
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -101,8 +101,8 @@ const ModernHeader = ({ onMenuClick }) => {
               sx={{
                 fontWeight: 700,
                 background: mode === 'light'
-                  ? 'linear-gradient(45deg, #18181b 30%, #ec4899 90%)'
-                  : 'linear-gradient(45deg, #fafafa 30%, #f472b6 90%)',
+                  ? 'linear-gradient(45deg, #1f2a2e 30%, #f47c6b 90%)'
+                  : 'linear-gradient(45deg, #fdf6ef 30%, #f6ad55 90%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 letterSpacing: '-0.5px',
@@ -135,7 +135,7 @@ const ModernHeader = ({ onMenuClick }) => {
                         width: 18,
                         height: 18,
                         borderRadius: '50%',
-                        bgcolor: '#ec4899',
+                        bgcolor: '#f47c6b',
                         color: 'white',
                         fontSize: '0.65rem',
                         display: 'flex',
@@ -155,9 +155,9 @@ const ModernHeader = ({ onMenuClick }) => {
                     sx={{
                       width: 35,
                       height: 35,
-                      bgcolor: mode === 'light' ? '#f472b6' : '#ec4899',
+                      bgcolor: mode === 'light' ? '#2bb3a2' : '#1f9f90',
                       border: '2px solid',
-                      borderColor: mode === 'light' ? '#fda4af' : '#f9a8d4',
+                      borderColor: mode === 'light' ? '#f6ad55' : '#f6ad55',
                     }}
                   >
                     {user?.name?.charAt(0).toUpperCase() || 'U'}
@@ -192,7 +192,7 @@ const ModernHeader = ({ onMenuClick }) => {
               <Button
                 onClick={() => navigate('/login')}
                 variant="text"
-                sx={{ color: mode === 'light' ? '#6b21a8' : '#f3e8ff', fontWeight: 600 }}
+                sx={{ color: mode === 'light' ? '#1f2a2e' : '#fdf6ef', fontWeight: 600 }}
               >
                 Login
               </Button>
@@ -200,14 +200,13 @@ const ModernHeader = ({ onMenuClick }) => {
                 onClick={() => navigate('/signup')}
                 variant="contained"
                 sx={{
-                  bgcolor: 'linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)',
-                  background: 'linear-gradient(90deg, #7c3aed 0%, #ec4899 100%)',
+                  background: 'linear-gradient(90deg, #2bb3a2 0%, #f47c6b 100%)',
                   color: 'white',
                   borderRadius: 999,
                   textTransform: 'none',
                   fontWeight: 600,
                   px: 2.5,
-                  boxShadow: '0 10px 20px rgba(236,72,153,0.2)'
+                  boxShadow: '0 10px 20px rgba(244,124,107,0.25)'
                 }}
               >
                 Sign up

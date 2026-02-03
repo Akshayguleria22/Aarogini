@@ -7,13 +7,151 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { protect } from '../middleware/auth.js';
-import { compareReportsFlow, analyzeWithGroq } from '../services/groqClient.js';
+import { compareReportsFlow, analyzeWithGroq, chatFlow, extractLabTestsWithGroq } from '../services/groqClient.js';
 import { derivePredictionsFromAnalysis } from '../services/modelService.js';
 import { extractText } from '../services/reportExtractor.js';
-import { parseTestsFromText } from '../services/parserService.js';
+import { parseTestsFromText, canonicalizeName, parseRange } from '../services/parserService.js';
 import { getWomenHealthGuidelines } from '../services/whoService.js';
 import MedicalReport from '../models/MedicalReport.js';
 import User from '../models/User.js';
+
+const normalizeStatus = (s) => {
+  const v = String(s || '').toUpperCase();
+  if (['NORMAL', 'HIGH', 'LOW', 'ABNORMAL'].includes(v)) return v;
+  if (v === 'H') return 'HIGH';
+  if (v === 'L') return 'LOW';
+  return 'NORMAL';
+};
+
+const EXPLANATIONS = {
+  hemoglobin: {
+    low: 'Low hemoglobin can indicate anemia or iron deficiency.',
+    high: 'High hemoglobin can occur with dehydration or other causes.'
+  },
+  tsh: {
+    high: 'High TSH can suggest an underactive thyroid.',
+    low: 'Low TSH can suggest an overactive thyroid.'
+  },
+  glucose_fasting: {
+    high: 'High fasting glucose can indicate impaired glucose control.',
+    low: 'Low fasting glucose can indicate hypoglycemia.'
+  },
+  hba1c: {
+    high: 'Elevated HbA1c suggests higher average blood sugar levels.',
+    low: 'Low HbA1c is uncommon and may need review.'
+  },
+  vitamin_d: {
+    low: 'Low vitamin D is common and can affect bone and mood.',
+    high: 'Very high vitamin D can be harmful.'
+  },
+  vitamin_b12: {
+    low: 'Low B12 can cause fatigue and nerve symptoms.',
+    high: 'High B12 is usually from supplements.'
+  },
+  iron: {
+    low: 'Low iron can contribute to fatigue and anemia.',
+    high: 'High iron may indicate excess supplementation.'
+  },
+  cholesterol_total: {
+    high: 'High total cholesterol can increase heart risk.'
+  },
+  ldl: {
+    high: 'High LDL increases cardiovascular risk.'
+  },
+  hdl: {
+    low: 'Low HDL reduces protective cholesterol.'
+  },
+  triglycerides: {
+    high: 'High triglycerides can raise heart risk.'
+  },
+  systolicbp: {
+    high: 'Elevated systolic blood pressure may indicate hypertension.'
+  },
+  diastolicbp: {
+    high: 'Elevated diastolic blood pressure may indicate hypertension.'
+  }
+};
+
+const RECOMMENDATIONS = {
+  hemoglobin_low: {
+    category: 'short-term',
+    action: 'Increase iron-rich foods (leafy greens, lentils, lean meats) and consider iron testing with your clinician.',
+    reason: 'Low hemoglobin can be linked to iron deficiency.'
+  },
+  vitamin_d_low: {
+    category: 'short-term',
+    action: 'Discuss vitamin D supplementation and safe sunlight exposure.',
+    reason: 'Low vitamin D can affect bone and mood health.'
+  },
+  tsh_high: {
+    category: 'short-term',
+    action: 'Consider a thyroid panel review with a clinician.',
+    reason: 'High TSH can indicate thyroid imbalance.'
+  },
+  glucose_fasting_high: {
+    category: 'short-term',
+    action: 'Reduce added sugars and refined carbs; consider repeat fasting glucose or HbA1c.',
+    reason: 'High fasting glucose suggests impaired glucose control.'
+  },
+  hba1c_high: {
+    category: 'short-term',
+    action: 'Discuss blood sugar management and repeat HbA1c in 3 months.',
+    reason: 'HbA1c reflects average blood sugar over time.'
+  },
+  ldl_high: {
+    category: 'long-term',
+    action: 'Increase fiber and healthy fats; review lipid profile with your clinician.',
+    reason: 'High LDL increases cardiovascular risk.'
+  }
+};
+
+const CONDITION_MAP = {
+  hemoglobin_low: 'Anemia (possible)',
+  iron_low: 'Iron deficiency (possible)',
+  vitamin_d_low: 'Vitamin D deficiency (possible)',
+  vitamin_b12_low: 'Vitamin B12 deficiency (possible)',
+  tsh_high: 'Possible hypothyroidism',
+  tsh_low: 'Possible hyperthyroidism',
+  glucose_fasting_high: 'Elevated fasting glucose',
+  hba1c_high: 'Elevated HbA1c',
+  ldl_high: 'High LDL cholesterol',
+  triglycerides_high: 'High triglycerides'
+};
+
+function buildAbnormalFindings(tests = []) {
+  const abnormal = [];
+  for (const t of tests) {
+    const status = normalizeStatus(t.status);
+    if (status === 'NORMAL') continue;
+    const canon = canonicalizeName(t.test_name || '');
+    const lowHigh = status === 'LOW' ? 'low' : 'high';
+    const exp = EXPLANATIONS[canon]?.[lowHigh] || EXPLANATIONS[canon]?.high || EXPLANATIONS[canon]?.low || 'Outside expected range.';
+
+    abnormal.push({
+      test: t.test_name || 'Test',
+      value: t.value || '',
+      normalRange: t.reference_range || 'Not provided',
+      status: lowHigh,
+      severity: lowHigh === 'low' ? 'moderate' : 'moderate',
+      explanation: exp,
+      concern: 'Consider discussing this result with a healthcare professional.'
+    });
+  }
+  return abnormal;
+}
+
+function buildRecommendations(abnormalFindings = []) {
+  const recs = [];
+  const add = (key) => {
+    if (RECOMMENDATIONS[key]) recs.push(RECOMMENDATIONS[key]);
+  };
+  for (const f of abnormalFindings) {
+    const canon = canonicalizeName(f.test || '');
+    const status = f.status === 'low' ? 'low' : 'high';
+    add(`${canon}_${status}`);
+  }
+  return recs.slice(0, 6);
+}
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -69,19 +207,51 @@ router.post('/analyze-report', protect, upload.single('report'), async (req, res
 
     // Parse tests and build local analysis
     const parsed = parseTestsFromText(extractedText);
-    const normalizeStatus = (s) => {
-      const v = String(s || '').toUpperCase();
-      if (['NORMAL', 'HIGH', 'LOW', 'ABNORMAL'].includes(v)) return v;
-      if (v === 'H') return 'HIGH';
-      if (v === 'L') return 'LOW';
-      return 'NORMAL';
-    };
+
+    let groqExtracted = [];
+    if ((parsed.tests || []).length < 4 && process.env.GROQ_API_KEY) {
+      const groqRes = await extractLabTestsWithGroq(extractedText);
+      if (groqRes.ok) groqExtracted = groqRes.tests || [];
+    }
+
+    const mergedMap = new Map();
+    (parsed.tests || []).forEach((t) => {
+      const key = canonicalizeName(t.test_name || '');
+      mergedMap.set(key || t.test_name, t);
+    });
+    for (const t of groqExtracted) {
+      const name = t.test_name || t.name || '';
+      const key = canonicalizeName(name || '');
+      if (!key || mergedMap.has(key)) continue;
+      const valueNum = Number.isFinite(Number(t.value)) ? String(t.value) : String(t.value || '');
+      mergedMap.set(key, {
+        test_name: name,
+        value: valueNum,
+        unit: t.unit || '',
+        reference_range: t.reference_range || '',
+        status: t.flag || '',
+        category: 'general'
+      });
+    }
+
+    const combinedTests = Array.from(mergedMap.values()).map((t) => {
+      const val = parseFloat(String(t.value || '').replace(/[<>]/g, ''));
+      let status = normalizeStatus(t.status);
+      const range = parseRange(t.reference_range || '');
+      if (range && Number.isFinite(val)) {
+        if (val < range.min) status = 'LOW';
+        else if (val > range.max) status = 'HIGH';
+        else status = 'NORMAL';
+      }
+      return {
+        ...t,
+        status
+      };
+    });
+
     let analysis = {
       patient_info: { name: null, age: null, gender: null, report_date: null },
-      tests: (parsed.tests || []).map((t) => ({
-        ...t,
-        status: normalizeStatus(t.status)
-      })),
+      tests: combinedTests,
       abnormal_findings: [],
       health_concerns: [],
       tracking_recommendations: [],
@@ -115,7 +285,7 @@ router.post('/analyze-report', protect, upload.single('report'), async (req, res
     // ML predictions based on parsed tests
     let mlPredictions = [];
     try {
-      mlPredictions = await derivePredictionsFromAnalysis({ tests: parsed.tests });
+      mlPredictions = await derivePredictionsFromAnalysis({ tests: combinedTests });
       for (const p of mlPredictions) {
         if (p.model === 'pcos' && (p.prediction === 1 || p.prediction === '1')) {
           analysis.detected_conditions.push('PCOS');
@@ -155,6 +325,27 @@ router.post('/analyze-report', protect, upload.single('report'), async (req, res
         const guideline = await getWomenHealthGuidelines(condition);
         if (guideline.success) whoGuidelines.push(guideline.data);
       }
+    }
+
+    // Abnormal findings + recommendations
+    analysis.abnormal_findings = buildAbnormalFindings(analysis.tests);
+    analysis.health_concerns = Array.from(new Set(analysis.abnormal_findings.map(f => f.test))).slice(0, 6);
+    analysis.tracking_recommendations = buildRecommendations(analysis.abnormal_findings).map(r => r.action);
+    analysis.womens_health_indicators = Array.from(new Set(analysis.tests.map(t => t.category).filter(Boolean))).slice(0, 6);
+
+    for (const f of analysis.abnormal_findings) {
+      const canon = canonicalizeName(f.test || '');
+      const key = `${canon}_${f.status || ''}`;
+      if (CONDITION_MAP[key]) {
+        analysis.detected_conditions.push(CONDITION_MAP[key]);
+      }
+    }
+    analysis.detected_conditions = Array.from(new Set(analysis.detected_conditions));
+
+    if (analysis.abnormal_findings.length > 0) {
+      analysis.summary = `Detected ${analysis.abnormal_findings.length} abnormal finding(s). Review highlighted tests and consider follow-up.`;
+    } else if (analysis.tests.length === 0) {
+      analysis.summary = 'No lab tests were detected in the uploaded report.';
     }
 
     // Groq AI insights (structured recommendations)
@@ -242,8 +433,7 @@ router.post('/chat', protect, async (req, res) => {
     if (!process.env.GROQ_API_KEY) {
       return res.status(503).json({ success: false, message: 'AI service is not configured' });
     }
-    const groqClient = (await import('../services/groqClient.js')).default;
-    const resp = await groqClient.chatFlow({ message });
+    const resp = await chatFlow({ message });
     res.status(200).json({ success: true, data: { response: resp.response } });
   } catch (error) {
     console.error('AI Chat (ML) Error:', error.message);

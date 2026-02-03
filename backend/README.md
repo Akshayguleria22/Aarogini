@@ -4,7 +4,7 @@
 - Node.js (v16 or higher)
 - MongoDB (local or MongoDB Atlas)
 - npm or yarn
- - Python 3.10+ (for ML inference; set PYTHON_EXE in .env if needed)
+ - Python 3.10+ (only required if you run the ML service locally)
 
 ## 📦 Installation Steps
 
@@ -37,16 +37,18 @@ npm install
 4. Update `.env` file with your connection string
 
 ### 3. Environment Variables
-The `.env` file has been created with default values. Update if needed:
+Copy `.env.example` to `.env` and set values:
 ```
 PORT=5000
 NODE_ENV=development
 MONGODB_URI=mongodb://localhost:27017/aarogini
-JWT_SECRET=aarogini_wellness_secret_key_2025
-JWT_EXPIRE=7d
+JWT_SECRET=your_secret
+JWT_EXPIRE=30d
 CLIENT_URL=http://localhost:5173
-# Optional: Path to Python executable for ML inference (defaults to 'python')
-PYTHON_EXE=C:\\Users\\<you>\\AppData\\Local\\Programs\\Python\\Python313\\python.exe
+GROQ_API_KEY=your_groq_key
+OPENFDA_API_KEY=optional
+GNEWS_API_KEY=optional
+ML_BASE_URL=http://127.0.0.1:8000
 ```
 
 ### 4. Start the Server
@@ -138,7 +140,7 @@ Server will run on: **http://localhost:5000**
 
 ### Chat Routes (`/api/chat`)
 - `POST /message` - Send message
-- Note: Chat uses the trained Q&A retriever first; falls back to Gemini/rule-based reply if unavailable
+- Note: Chat uses Groq (Llama) only when configured
 - `GET /history/:sessionId` - Get chat history
 - `GET /sessions` - Get all sessions
 - `DELETE /session/:sessionId` - Delete session

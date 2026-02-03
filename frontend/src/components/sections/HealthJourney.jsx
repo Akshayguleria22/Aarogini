@@ -159,14 +159,14 @@ const HealthJourney = ({ loading }) => {
         
         {/* Card Progress Indicator */}
         <div className="flex items-center gap-3">
-            <div className="text-sm font-semibold text-purple-600 dark:text-pink-400">
+            <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
             {Math.min(activeDot * cardsPerPage + 1, healthJourney.length)}-{Math.min((activeDot + 1) * cardsPerPage, healthJourney.length)} <span className="text-gray-400">of {healthJourney.length}</span>
           </div>
           
           {/* Progress Bar */}
             <div className="w-32 h-2 bg-gray-200 dark:bg-zinc-800 rounded-full overflow-hidden">
               <div
-                className="h-full bg-linear-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-300"
+                className="h-full bg-linear-to-r from-emerald-500 to-orange-500 rounded-full transition-all duration-300"
                 style={{ width: `${((activeDot + 1) / totalPages) * 100}%` }}
             />
           </div>
@@ -182,7 +182,7 @@ const HealthJourney = ({ loading }) => {
           aria-label="Scroll left"
         >
           <svg 
-            className="w-5 h-5 text-purple-600 group-hover:text-purple-700 transition-colors" 
+            className="w-5 h-5 text-emerald-700 group-hover:text-emerald-800 transition-colors" 
             fill="none" 
             stroke="currentColor" 
             viewBox="0 0 24 24"
@@ -198,7 +198,7 @@ const HealthJourney = ({ loading }) => {
           aria-label="Scroll right"
         >
           <svg 
-            className="w-5 h-5 text-purple-600 group-hover:text-purple-700 transition-colors" 
+            className="w-5 h-5 text-emerald-700 group-hover:text-emerald-800 transition-colors" 
             fill="none" 
             stroke="currentColor" 
             viewBox="0 0 24 24"
@@ -252,9 +252,9 @@ const HealthJourney = ({ loading }) => {
                       height: '100%'
                     }}
                   >
-                    <div className="w-16 h-16 bg-linear-to-br from-purple-50 to-pink-50 dark:from-zinc-800 dark:to-zinc-700 rounded-full flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform duration-300">
+                    <div className="w-16 h-16 bg-linear-to-br from-emerald-50 to-amber-50 dark:from-zinc-800 dark:to-zinc-700 rounded-full flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform duration-300">
                       <div className="transform group-hover:scale-110 transition-transform duration-200">
-                        <item.icon className="w-8 h-8 text-purple-600" />
+                        <item.icon className="w-8 h-8 text-emerald-700" />
                       </div>
                     </div>
                     <p className="text-sm font-semibold text-center leading-tight text-zinc-900 dark:text-zinc-100">{item.name}</p>
@@ -312,13 +312,13 @@ const HealthJourney = ({ loading }) => {
         trackerOpen && (
           <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
             <div className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl overflow-hidden">
-              <div className="px-5 py-4 bg-linear-to-r from-purple-500 to-pink-500 text-white flex items-center justify-between">
+              <div className="px-5 py-4 bg-linear-to-r from-emerald-500 to-orange-500 text-white flex items-center justify-between">
                 <h3 className="text-lg font-bold">{selectedCondition || 'Tracker'}</h3>
-                <button onClick={() => setTrackerOpen(false)} className="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-full">×</button>
+                <button onClick={() => setTrackerOpen(false)} className="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-full">X</button>
               </div>
               <div className="p-5 space-y-4">
                 {detailsLoading ? (
-                  <p className="text-sm text-gray-600 dark:text-zinc-400">Loading…</p>
+                  <p className="text-sm text-gray-600 dark:text-zinc-400">Loading...</p>
                 ) : (
                   <>
                     {/* Summary Row */}
@@ -380,7 +380,7 @@ const HealthJourney = ({ loading }) => {
                 )}
               </div>
               <div className="p-4 pt-0 flex items-center justify-end">
-                <button onClick={() => setTrackerOpen(false)} className="px-4 py-2 rounded-lg bg-linear-to-r from-purple-500 to-pink-500 text-white font-semibold">Close</button>
+                <button onClick={() => setTrackerOpen(false)} className="px-4 py-2 rounded-lg bg-linear-to-r from-emerald-500 to-orange-500 text-white font-semibold">Close</button>
               </div>
             </div>
           </div>
@@ -390,3 +390,4 @@ const HealthJourney = ({ loading }) => {
 }
 
 export default HealthJourney
+

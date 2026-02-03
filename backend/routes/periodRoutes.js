@@ -4,14 +4,76 @@ import PeriodTracker from '../models/PeriodTracker.js';
 import { protect } from '../middleware/auth.js';
 import { chatFlow } from '../services/groqClient.js';
 
+const toDateOnly = (d) => new Date(new Date(d).toISOString().split('T')[0]);
+const diffDays = (a, b) => Math.round((toDateOnly(a) - toDateOnly(b)) / (1000 * 60 * 60 * 24));
+const mean = (arr) => arr.reduce((s, n) => s + n, 0) / (arr.length || 1);
+const std = (arr) => {
+  if (arr.length < 2) return 0;
+  const m = mean(arr);
+  const v = mean(arr.map(x => (x - m) ** 2));
+  return Math.sqrt(v);
+};
+
+const getCycleStats = (periods) => {
+  const sorted = (periods || [])
+    .filter(p => p.cycleStartDate)
+    .sort((a, b) => new Date(a.cycleStartDate) - new Date(b.cycleStartDate));
+
+  const cycleLengths = [];
+  for (let i = 1; i < sorted.length; i += 1) {
+    const len = diffDays(sorted[i].cycleStartDate, sorted[i - 1].cycleStartDate);
+    if (len >= 20 && len <= 45) cycleLengths.push(len);
+  }
+
+  const periodLengths = (periods || [])
+    .map(p => Number(p.periodLength))
+    .filter(n => Number.isFinite(n) && n >= 2 && n <= 10);
+
+  const avgCycle = cycleLengths.length ? Math.round(mean(cycleLengths)) : 28;
+  const avgPeriod = periodLengths.length ? Math.round(mean(periodLengths)) : 5;
+  const isRegular = cycleLengths.length >= 3 ? std(cycleLengths) <= 3 : true;
+
+  return { avgCycle, avgPeriod, isRegular };
+};
+
 // @route   POST /api/periods
 // @desc    Create a new period entry
 // @access  Private
 router.post('/', protect, async (req, res) => {
   try {
+    if (!req.body?.cycleStartDate) {
+      return res.status(400).json({ success: false, message: 'cycleStartDate is required' });
+    }
+
+    const startDate = new Date(req.body.cycleStartDate);
+    const previousPeriods = await PeriodTracker.find({ user: req.user.id }).sort({ cycleStartDate: -1 }).limit(12);
+
+    // Close any active cycle if a new start date is logged
+    const active = previousPeriods.find(p => !p.cycleEndDate);
+    if (active && new Date(active.cycleStartDate) < startDate) {
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() - 1);
+      const computedLength = diffDays(startDate, active.cycleStartDate);
+      await PeriodTracker.updateOne(
+        { _id: active._id },
+        { $set: { cycleEndDate: endDate, cycleLength: computedLength } }
+      );
+    }
+
+    const stats = getCycleStats(previousPeriods);
+    const cycleLength = Number(req.body.cycleLength || stats.avgCycle || 28);
+    const periodLength = Number(req.body.periodLength || stats.avgPeriod || 5);
+
     const periodEntry = await PeriodTracker.create({
       user: req.user.id,
-      ...req.body
+      cycleStartDate: startDate,
+      cycleLength,
+      periodLength,
+      isRegular: stats.isRegular,
+      flow: req.body.flow || 'medium',
+      symptoms: req.body.symptoms || [],
+      mood: req.body.mood,
+      notes: req.body.notes || ''
     });
 
     res.status(201).json({
@@ -400,12 +462,21 @@ router.get('/predictions/next', protect, async (req, res) => {
       });
     }
 
+    const history = await PeriodTracker.find({ user: req.user.id }).sort({ cycleStartDate: -1 }).limit(12);
+    const stats = getCycleStats(history);
+    const cycleLength = Number(lastPeriod.cycleLength || stats.avgCycle || 28);
+    const start = new Date(lastPeriod.cycleStartDate);
+    const predictedNextPeriod = new Date(start);
+    predictedNextPeriod.setDate(predictedNextPeriod.getDate() + cycleLength);
+    const predictedOvulation = new Date(predictedNextPeriod);
+    predictedOvulation.setDate(predictedOvulation.getDate() - 14);
+
     res.status(200).json({
       success: true,
       data: {
-        predictedNextPeriod: lastPeriod.predictedNextPeriod,
-        predictedOvulation: lastPeriod.predictedOvulation,
-        cycleLength: lastPeriod.cycleLength
+        predictedNextPeriod,
+        predictedOvulation,
+        cycleLength
       }
     });
   } catch (error) {

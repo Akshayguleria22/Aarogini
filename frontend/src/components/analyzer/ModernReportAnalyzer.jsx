@@ -95,7 +95,9 @@ const buildFallbackInsights = (analysis = {}) => {
       test: f.test || 'Test',
       value: f.value || '—',
       normalRange: f.normalRange || '—',
-      status: f.severity === 'severe' ? 'high' : 'low',
+      status: f.status === 'high' || f.status === 'low'
+        ? f.status
+        : (f.severity === 'severe' ? 'high' : 'low'),
       explanation: f.explanation || 'Outside expected range',
       concern: f.concern || 'Please review with your clinician'
     })),

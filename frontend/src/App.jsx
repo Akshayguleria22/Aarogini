@@ -32,17 +32,17 @@ function Home() {
   const isLoading = pageLoading || !imageLoaded
 
   return (
-    <div className="min-h-screen flex flex-col overflow-y-auto overflow-x-hidden bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen flex flex-col overflow-y-auto overflow-x-hidden bg-[#f7f3ee] dark:bg-[#0f1515]">
 
       <AnimatedBackground imageLoaded={imageLoaded} setImageLoaded={setImageLoaded} />
 
       <ModernHeader />
 
       {/* Main Content - Single View */}
-      <main className="relative z-10 flex-1 px-8 pb-6 flex flex-col pt-24">
+      <main className="relative z-10 flex-1 px-6 lg:px-10 pb-8 flex flex-col pt-24">
         <div className="flex flex-col space-y-3 py-4">
           {/* Top Section: Article Slider (Left) + Hero (Right) */}
-          <div className="flex gap-6 items-start">
+          <div className="flex flex-col lg:flex-row gap-6 items-start">
             <ArticlesSlider loading={isLoading} />
             <HeroSection loading={isLoading} />
           </div>
@@ -81,7 +81,7 @@ function App() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-        <div className="w-12 h-12 rounded-full border-4 border-purple-200 border-t-purple-600 animate-spin" />
+        <div className="w-12 h-12 rounded-full border-4 border-emerald-200 border-t-emerald-600 animate-spin" />
       </div>
     )
   }

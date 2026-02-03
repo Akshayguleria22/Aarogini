@@ -1,7 +1,9 @@
 import express from 'express';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import { protect } from '../middleware/auth.js';
-import { runHealthAnalysis } from '../services/healthAIEngine.js';
+import { runHealthAnalysis } from '../services/healthAiEngine.js';
 import MedicalReport from '../models/MedicalReport.js';
 
 const router = express.Router();
@@ -26,6 +28,33 @@ router.get('/', protect, async (req, res) => {
       success: false,
       message: error.message || 'Failed to fetch reports'
     });
+  }
+});
+
+// @route   GET /api/reports/:id/download
+// @desc    Download report file
+// @access  Private
+router.get('/:id/download', protect, async (req, res) => {
+  try {
+    const report = await MedicalReport.findById(req.params.id);
+    if (!report) {
+      return res.status(404).json({ success: false, message: 'Report not found' });
+    }
+
+    if (report.user.toString() !== req.user.id) {
+      return res.status(401).json({ success: false, message: 'Not authorized to access this report' });
+    }
+
+    if (!report.filePath || !fs.existsSync(report.filePath)) {
+      return res.status(404).json({ success: false, message: 'Report file not available' });
+    }
+
+    const filename = report.reportName || path.basename(report.filePath);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    return res.sendFile(path.resolve(report.filePath));
+  } catch (error) {
+    console.error('Error downloading report:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to download report' });
   }
 });
 

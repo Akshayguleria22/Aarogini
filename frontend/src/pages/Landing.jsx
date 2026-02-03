@@ -32,10 +32,10 @@ const Landing = () => {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col overflow-y-auto overflow-x-hidden bg-zinc-50 dark:bg-zinc-950 relative">
+    <div className="min-h-screen flex flex-col overflow-y-auto overflow-x-hidden bg-[#f7f3ee] dark:bg-[#0f1515] relative">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-28 right-10 w-80 h-80 bg-purple-200/30 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-24 left-10 w-96 h-96 bg-pink-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute -top-28 right-10 w-80 h-80 bg-emerald-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-24 left-10 w-96 h-96 bg-orange-200/30 rounded-full blur-3xl"></div>
       </div>
       <ModernHeader />
 
@@ -43,10 +43,10 @@ const Landing = () => {
         {/* Hero */}
         <section className="flex flex-col lg:flex-row items-center gap-10">
           <div className="flex-1">
-            <p className="text-sm uppercase tracking-widest text-purple-600 font-semibold">Aarogini</p>
+            <p className="text-sm uppercase tracking-widest text-emerald-700 font-semibold">Aarogini</p>
             <h1 className="text-5xl font-bold leading-tight text-zinc-900 dark:text-zinc-100 mt-3">
               A calm, caring space for your
-              <span className="block bg-linear-to-r from-purple-600 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              <span className="block bg-linear-to-r from-emerald-600 via-teal-500 to-orange-400 bg-clip-text text-transparent">
                 everyday health journey
               </span>
             </h1>
@@ -55,7 +55,7 @@ const Landing = () => {
               personalized insights, expert-backed content, and a friendly AI companion.
             </p>
             <div className="mt-6 flex items-center gap-3">
-              <Link to={isAuthenticated ? "/" : "/signup"} className="px-6 py-3 rounded-full bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all">
+              <Link to={isAuthenticated ? "/" : "/signup"} className="px-6 py-3 rounded-full bg-linear-to-r from-emerald-600 to-orange-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all">
                 Get Started
               </Link>
               {!isAuthenticated && (
@@ -88,8 +88,8 @@ const Landing = () => {
                   </div>
                 ))}
               </div>
-              <div className="mt-4 p-4 rounded-2xl bg-linear-to-r from-purple-600 to-pink-600 text-white">
-                <p className="text-sm">“Your next cycle prediction is in 5 days.”</p>
+              <div className="mt-4 p-4 rounded-2xl bg-linear-to-r from-emerald-600 to-orange-500 text-white">
+                <p className="text-sm">Your next cycle prediction is in 5 days.</p>
                 <p className="text-xs opacity-80 mt-1">Enable reminders after you sign up.</p>
               </div>
             </div>
@@ -99,7 +99,7 @@ const Landing = () => {
         {/* Features */}
         <section className="mt-12">
           <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Why women choose Aarogini</h2>
-          <p className="text-zinc-500 mt-2">A gentle, data-informed approach to women’s health.</p>
+          <p className="text-zinc-500 mt-2">A gentle, data-informed approach to women's health.</p>
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {featureList.map((feature) => (
               <div key={feature.title} className="p-5 rounded-2xl bg-white/80 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 shadow-sm">
@@ -114,7 +114,7 @@ const Landing = () => {
         <section className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-4">
           {steps.map((step, index) => (
             <div key={step.title} className="p-6 rounded-2xl bg-white/80 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800">
-              <span className="text-xs font-semibold text-purple-600">Step {index + 1}</span>
+              <span className="text-xs font-semibold text-emerald-700">Step {index + 1}</span>
               <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mt-2">{step.title}</h3>
               <p className="text-sm text-zinc-600 dark:text-zinc-300 mt-2">{step.desc}</p>
             </div>
@@ -122,12 +122,12 @@ const Landing = () => {
         </section>
 
         {/* CTA */}
-        <section className="mt-12 rounded-3xl bg-linear-to-r from-purple-600 to-pink-600 text-white p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <section className="mt-12 rounded-3xl bg-linear-to-r from-emerald-600 to-orange-500 text-white p-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <h3 className="text-2xl font-bold">Start your personalized health journey</h3>
             <p className="text-sm text-white/90 mt-2">Create a free account and unlock your dashboard, trackers, and insights.</p>
           </div>
-          <Link to={isAuthenticated ? "/" : "/signup"} className="px-6 py-3 rounded-full bg-white text-purple-700 font-semibold shadow-lg">
+          <Link to={isAuthenticated ? "/" : "/signup"} className="px-6 py-3 rounded-full bg-white text-emerald-700 font-semibold shadow-lg">
             {isAuthenticated ? 'Go to Home' : 'Create account'}
           </Link>
         </section>
@@ -139,3 +139,4 @@ const Landing = () => {
 }
 
 export default Landing
+

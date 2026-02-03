@@ -20,11 +20,16 @@ export async function analyzeWithML(data) {
     console.error("ML Service Error:", err.message);
 
     // Fallback (temporary safety)
+    const toNum = (v) => (typeof v === 'number' && !Number.isNaN(v) ? v : null);
+    const hb = toNum(data?.hb);
+    const sugar = toNum(data?.sugar);
+    const sys = toNum(data?.bp_sys);
+
     return {
       risk: "unknown",
-      anemia: data.hb < 12,
-      diabetes: data.sugar > 140,
-      bpRisk: data.bp_sys > 130
+      anemia: hb === null ? null : hb < 12,
+      diabetes: sugar === null ? null : sugar > 140,
+      bpRisk: sys === null ? null : sys > 130
     };
   }
 }

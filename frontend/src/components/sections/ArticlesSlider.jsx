@@ -138,7 +138,7 @@ const ArticlesSlider = ({ loading }) => {
 
   if (loading) {
     return (
-      <div className="relative bg-white/60 backdrop-blur-sm rounded-3xl p-5 shadow-lg" style={{ width: '45%' }}>
+      <div className="relative w-full lg:w-[45%] bg-white/70 backdrop-blur-sm rounded-3xl p-5 shadow-lg border border-white/60">
         <Skeleton className="h-6 w-48 rounded-lg mb-4" />
         <Skeleton className="h-[350px] w-full rounded-2xl" />
       </div>
@@ -146,8 +146,8 @@ const ArticlesSlider = ({ loading }) => {
   }
 
   return (
-    <div className="relative bg-white/60 backdrop-blur-sm rounded-3xl p-5 shadow-lg animate-fade-in animation-delay-100" style={{ width: '45%' }}>
-      <h2 className="text-lg font-bold mb-3" style={{ color: '#3B3A60' }}>Latest Health Articles</h2>
+    <div className="relative w-full lg:w-[45%] bg-white/70 backdrop-blur-sm rounded-3xl p-5 shadow-lg animate-fade-in animation-delay-100 border border-white/60">
+      <h2 className="text-lg font-bold mb-3 text-zinc-800">Latest Health Articles</h2>
 
       {/* Single Article Display with Full Image Background */}
       <div className="relative overflow-hidden rounded-2xl" style={{ height: '350px' }}>
@@ -169,7 +169,7 @@ const ArticlesSlider = ({ loading }) => {
           {/* Text Content Overlay */}
           <div className="absolute inset-0 flex flex-col justify-end p-6">
             <div className="mb-2">
-              <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-purple-600 shadow-sm">
+              <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-emerald-700 shadow-sm">
                 {articles[currentIndex].tag}
               </span>
             </div>
@@ -195,7 +195,7 @@ const ArticlesSlider = ({ loading }) => {
           aria-label="Previous article"
         >
           <svg
-            className="w-5 h-5 text-purple-600 group-hover:text-purple-700 transition-colors"
+            className="w-5 h-5 text-emerald-700 group-hover:text-emerald-800 transition-colors"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -210,7 +210,7 @@ const ArticlesSlider = ({ loading }) => {
           aria-label="Next article"
         >
           <svg
-            className="w-5 h-5 text-purple-600 group-hover:text-purple-700 transition-colors"
+            className="w-5 h-5 text-emerald-700 group-hover:text-emerald-800 transition-colors"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

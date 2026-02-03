@@ -4,10 +4,10 @@ import Skeleton from '../ui/Skeleton'
 
 const FeatureCards = ({ activeFeature, setActiveFeature, loading }) => {
   const mainFeatures = [
-    { img: '/blood.jpg', name: 'PERIOD TRACKER' },
-    { img: '/medicine.jpg', name: 'MEDICINE SEARCH' },
-    { img: '/report.jpg', name: 'REPORT RECORD' },
-    { img: '/chat.jpg', name: 'CHAT VEDA (AI CHATBOT)' },
+    { img: '/blood.jpg', name: 'Period Tracker', description: 'Cycle predictions, daily symptoms, and personalized insights.', accent: 'from-emerald-500 to-teal-500' },
+    { img: '/medicine.jpg', name: 'Medicine Search', description: 'Clear summaries, interactions, and safety guidance.', accent: 'from-orange-500 to-amber-500' },
+    { img: '/report.jpg', name: 'Report Analyzer', description: 'Lab extraction, abnormal flags, and next steps.', accent: 'from-sky-500 to-cyan-500' },
+    { img: '/chat.jpg', name: 'Chat Veda', description: 'Long-form answers with context from your health profile.', accent: 'from-rose-500 to-orange-500' },
   ]
 
   if (loading) {
@@ -27,36 +27,49 @@ const FeatureCards = ({ activeFeature, setActiveFeature, loading }) => {
   }
 
   return (
-    <div className="grid grid-cols-4 gap-3 animate-fade-in animation-delay-200">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in animation-delay-200">
       {mainFeatures.map((feature, index) => (
         <div
           key={index}
           onClick={() => setActiveFeature(index)}
           className={cn(
-            "group relative p-6 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-105",
-            "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800",
-            "hover:shadow-2xl hover:border-pink-500 dark:hover:border-pink-500",
-            activeFeature === index && "border-pink-500 dark:border-pink-500 shadow-2xl shadow-pink-500/20",
-            "min-h-[240px] flex flex-col justify-center items-center"
+            "group relative p-6 rounded-2xl cursor-pointer transition-all duration-300 hover:translate-y-[-4px]",
+            "bg-white/80 dark:bg-zinc-900/70 border border-white/60 dark:border-zinc-800",
+            "shadow-lg hover:shadow-2xl",
+            activeFeature === index && "ring-2 ring-emerald-400/60",
+            "min-h-[260px] flex flex-col justify-between"
           )}
           style={{
             animationDelay: `${index * 100 + 400}ms`,
           }}
         >
-          <div className="mb-4 transition-all duration-300 group-hover:scale-110">
-            <img
-              src={feature.img}
-              alt={feature.name}
-              className="w-16 h-16 rounded-full object-cover shadow-md ring-2 ring-pink-500/50"
-            />
+          <div className="flex items-center gap-3">
+            <div className={cn("p-[2px] rounded-2xl bg-gradient-to-r", feature.accent)}>
+              <img
+                src={feature.img}
+                alt={feature.name}
+                className="w-14 h-14 rounded-2xl object-cover shadow-md bg-white"
+              />
+            </div>
+            <div>
+              <p className={cn(
+                "text-sm font-semibold tracking-tight",
+                "text-zinc-800 dark:text-zinc-100",
+                activeFeature === index && "text-emerald-600 dark:text-emerald-300"
+              )}>
+                {feature.name}
+              </p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                Tap to open
+              </p>
+            </div>
           </div>
-          <p className={cn(
-            "text-xs font-semibold tracking-wider uppercase leading-tight text-center",
-            "text-zinc-700 dark:text-zinc-300",
-            activeFeature === index && "text-pink-600 dark:text-pink-400"
-          )}>
-            {feature.name}
+
+          <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed mt-4">
+            {feature.description}
           </p>
+
+          <div className={cn("h-1 w-full rounded-full bg-gradient-to-r opacity-70", feature.accent)}></div>
         </div>
       ))}
     </div>

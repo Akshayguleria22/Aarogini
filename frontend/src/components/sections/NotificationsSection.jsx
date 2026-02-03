@@ -23,7 +23,7 @@ const seedNotifications = [
   {
     id: 'n3',
     title: 'Period tracker reminder',
-    body: 'Log today’s symptoms to keep your cycle insights accurate.',
+    body: "Log today's symptoms to keep your cycle insights accurate.",
     time: 'Yesterday',
     read: true,
     type: 'reminder'
@@ -31,8 +31,8 @@ const seedNotifications = [
 ]
 
 const typeStyles = {
-  insight: 'bg-purple-100 text-purple-700',
-  article: 'bg-pink-100 text-pink-700',
+  insight: 'bg-emerald-100 text-emerald-700',
+  article: 'bg-orange-100 text-orange-700',
   reminder: 'bg-amber-100 text-amber-700',
 }
 
@@ -82,7 +82,7 @@ const NotificationsSection = ({ loading }) => {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Notifications</h2>
-          <p className="text-sm text-zinc-500">{unreadCount} unread · {items.length} total</p>
+          <p className="text-sm text-zinc-500">{unreadCount} unread - {items.length} total</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -101,13 +101,13 @@ const NotificationsSection = ({ loading }) => {
       </div>
 
       {items.length === 0 ? (
-        <div className="text-center py-8 text-zinc-500">You're all caught up 🎉</div>
+        <div className="text-center py-8 text-zinc-500">You're all caught up</div>
       ) : (
         <div className="space-y-3">
           {items.map((item) => (
             <div
               key={item.id}
-              className={`p-4 rounded-2xl border transition-all ${item.read ? 'border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/80' : 'border-purple-200 dark:border-purple-500/40 bg-purple-50/60 dark:bg-zinc-900'} `}
+              className={`p-4 rounded-2xl border transition-all ${item.read ? 'border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900' : 'border-emerald-200 dark:border-emerald-500/40 bg-emerald-50/60 dark:bg-zinc-900'}`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">

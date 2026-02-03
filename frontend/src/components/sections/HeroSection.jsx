@@ -15,18 +15,17 @@ const HeroSection = ({ loading }) => {
   }
 
   return (
-    <div className="space-y-3 animate-slide-in-left pt-2 flex-1">
-      <h1 className="text-5xl font-bold leading-tight tracking-tight" style={{ color: '#3B3A60' }}>
+    <div className="space-y-4 animate-slide-in-left pt-2 flex-1">
+      <h1 className="text-5xl font-bold leading-tight tracking-tight font-display" style={{ color: '#1f2a2e' }}>
         Aarogini: <br />
-        <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-          Your Daily Guide
+        <span className="bg-gradient-to-r from-emerald-600 via-teal-500 to-orange-400 bg-clip-text text-transparent">
+          Your Daily Health Guide
         </span>
       </h1>
-      <p className="text-lg leading-relaxed max-w-2xl" style={{ color: '#6B6A7D' }}>
-        Empowering women through personalized health tracking, expert guidance, and holistic wellness solutions for every stage of life. 
-        From menstrual cycle tracking to pregnancy care, postpartum support to menopause management.
-        Connect with healthcare professionals, access curated articles, and discover personalized wellness plans designed specifically
-        for women's unique health needs.
+      <p className="text-lg leading-relaxed max-w-2xl text-zinc-600 dark:text-zinc-300">
+        Personalized health tracking, expert guidance, and holistic wellness support for every stage of life.
+        From cycle insights to pregnancy care, postpartum recovery to menopause support, Aarogini keeps your health journey organized,
+        clear, and actionable.
       </p>
     </div>
   )

@@ -160,7 +160,7 @@ const MedicineSearch = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="relative bg-linear-to-br from-pink-50 via-purple-50 to-blue-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-900 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto border border-zinc-200/60 dark:border-zinc-800">
+      <div className="relative bg-linear-to-br from-emerald-50 via-amber-50 to-sky-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-900 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto border border-zinc-200/60 dark:border-zinc-800">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -175,7 +175,7 @@ const MedicineSearch = ({ onClose }) => {
         <div className="p-8">
         {/* Header */}
         <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-purple-800 dark:text-zinc-100 mb-2">
+            <h1 className="text-3xl font-bold text-emerald-800 dark:text-zinc-100 mb-2">
               Medicine Search
           </h1>
             <p className="text-gray-600 dark:text-zinc-400">
@@ -193,8 +193,8 @@ const MedicineSearch = ({ onClose }) => {
               }}
               className={`flex-1 py-4 px-6 font-medium transition-colors ${
                 activeTab === 'search'
-                  ? 'text-purple-600 border-b-2 border-purple-600'
-                : 'text-gray-500 dark:text-zinc-400 hover:text-purple-500'
+                  ? 'text-emerald-600 border-b-2 border-emerald-600'
+                : 'text-gray-500 dark:text-zinc-400 hover:text-emerald-500'
               }`}
             >
                 Search Medicine
@@ -206,8 +206,8 @@ const MedicineSearch = ({ onClose }) => {
               }}
               className={`flex-1 py-4 px-6 font-medium transition-colors ${
                 activeTab === 'compare'
-                  ? 'text-purple-600 border-b-2 border-purple-600'
-                  : 'text-gray-500 hover:text-purple-500'
+                  ? 'text-emerald-600 border-b-2 border-emerald-600'
+                  : 'text-gray-500 hover:text-emerald-500'
               }`}
             >
                 Compare Medicines
@@ -219,8 +219,8 @@ const MedicineSearch = ({ onClose }) => {
               }}
               className={`flex-1 py-4 px-6 font-medium transition-colors ${
                 activeTab === 'interactions'
-                  ? 'text-purple-600 border-b-2 border-purple-600'
-                  : 'text-gray-500 hover:text-purple-500'
+                  ? 'text-emerald-600 border-b-2 border-emerald-600'
+                  : 'text-gray-500 hover:text-emerald-500'
               }`}
             >
                 Check Interactions
@@ -248,7 +248,7 @@ const MedicineSearch = ({ onClose }) => {
                   <button
                     key={idx}
                     onClick={() => setSearchQuery(category.examples[0])}
-                    className="p-4 bg-linear-to-br from-purple-50 to-pink-50 dark:from-zinc-800 dark:to-zinc-900 rounded-lg hover:shadow-lg transition-all text-left"
+                    className="p-4 bg-linear-to-br from-emerald-50 to-amber-50 dark:from-zinc-800 dark:to-zinc-900 rounded-lg hover:shadow-lg transition-all text-left"
                   >
                     <div className="text-3xl mb-2">{category.icon}</div>
                     <div className="font-semibold text-gray-800 dark:text-zinc-100">
@@ -274,13 +274,13 @@ const MedicineSearch = ({ onClose }) => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="E.g., Paracetamol, Ibuprofen, Amoxicillin"
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Searching...' : '🔍 Search Medicine'}
                 </button>
@@ -292,7 +292,7 @@ const MedicineSearch = ({ onClose }) => {
               <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-200/70 dark:border-zinc-800">
                   {searchResult && (
                     <>
-                      <h3 className="text-2xl font-bold text-purple-800 dark:text-purple-300 mb-4">
+                      <h3 className="text-2xl font-bold text-emerald-800 dark:text-emerald-300 mb-4">
                         AI Summary for: {searchResult.searchTerm}
                       </h3>
                       <div className="prose max-w-none">
@@ -422,21 +422,21 @@ const MedicineSearch = ({ onClose }) => {
                         setCompareMeds(newMeds);
                       }}
                       placeholder={`Enter medicine ${idx + 1} name`}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100"
                     />
                   </div>
                 ))}
                 <button
                   type="button"
                   onClick={addCompareMedicine}
-                  className="text-purple-600 hover:text-purple-700 font-medium"
+                  className="text-emerald-600 hover:text-emerald-700 font-medium"
                 >
                   + Add Another Medicine
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Comparing...' : '⚖️ Compare Medicines'}
                 </button>
@@ -446,7 +446,7 @@ const MedicineSearch = ({ onClose }) => {
             {/* Compare Results */}
             {compareResult && (
               <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-200/70 dark:border-zinc-800">
-                <h3 className="text-2xl font-bold text-purple-800 dark:text-purple-300 mb-4">
+                <h3 className="text-2xl font-bold text-emerald-800 dark:text-emerald-300 mb-4">
                   Comparison: {compareResult.medicines.join(' vs ')}
                 </h3>
                 <div className="prose max-w-none">
@@ -486,14 +486,14 @@ const MedicineSearch = ({ onClose }) => {
                           setInteractionMeds(newMeds);
                         }}
                         placeholder={`Medicine ${idx + 1}`}
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100"
                       />
                     </div>
                   ))}
                   <button
                     type="button"
                     onClick={addInteractionMedicine}
-                    className="text-purple-600 hover:text-purple-700 font-medium"
+                    className="text-emerald-600 hover:text-emerald-700 font-medium"
                   >
                     + Add Another Medicine
                   </button>
@@ -515,14 +515,14 @@ const MedicineSearch = ({ onClose }) => {
                           setConditions(newConditions);
                         }}
                         placeholder={`Condition ${idx + 1} (e.g., Diabetes, Hypertension)`}
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100"
                       />
                     </div>
                   ))}
                   <button
                     type="button"
                     onClick={addCondition}
-                    className="text-purple-600 hover:text-purple-700 font-medium"
+                    className="text-emerald-600 hover:text-emerald-700 font-medium"
                   >
                     + Add Another Condition
                   </button>
@@ -531,7 +531,7 @@ const MedicineSearch = ({ onClose }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Checking...' : '⚠️ Check Interactions'}
                 </button>
@@ -541,7 +541,7 @@ const MedicineSearch = ({ onClose }) => {
             {/* Interaction Results */}
             {interactionResult && (
               <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-200/70 dark:border-zinc-800">
-                <h3 className="text-2xl font-bold text-purple-800 dark:text-purple-300 mb-4">
+                <h3 className="text-2xl font-bold text-emerald-800 dark:text-emerald-300 mb-4">
                   Interaction Check Results
                 </h3>
                 <div className="bg-yellow-50 dark:bg-zinc-800 border border-yellow-200 dark:border-yellow-900/40 p-4 rounded-lg mb-4">
@@ -579,3 +579,4 @@ const MedicineSearch = ({ onClose }) => {
 };
 
 export default MedicineSearch;
+

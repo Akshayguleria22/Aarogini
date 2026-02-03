@@ -195,15 +195,15 @@ const ChatBot = ({ isOpen, onClose }) => {
         </div>
 
         {/* Quick Actions */}
-        <div className="p-3 bg-purple-50 dark:bg-zinc-900 border-b border-purple-100 dark:border-zinc-800">
+        <div className="p-3 bg-emerald-50 dark:bg-zinc-900 border-b border-emerald-100 dark:border-zinc-800">
           <div className="grid grid-cols-2 gap-2">
             {quickActions.map((action, index) => (
               <button
                 key={index}
                 onClick={() => handleQuickAction(action.query)}
-                className="flex items-center gap-2 p-2 bg-white dark:bg-zinc-900 rounded-lg hover:bg-purple-100 dark:hover:bg-zinc-800 transition-colors text-sm"
+                className="flex items-center gap-2 p-2 bg-white dark:bg-zinc-900 rounded-lg hover:bg-emerald-100 dark:hover:bg-zinc-800 transition-colors text-sm"
               >
-                <action.icon className="w-4 h-4 text-purple-600" />
+                <action.icon className="w-4 h-4 text-emerald-600" />
                 <span className="text-gray-700 dark:text-zinc-200 font-medium">{action.label}</span>
               </button>
             ))}
@@ -237,7 +237,7 @@ const ChatBot = ({ isOpen, onClose }) => {
                 <div
                   className={`rounded-2xl p-3 ${
                     message.sender === 'user'
-                    ? 'bg-pink-500 dark:bg-pink-600 text-white'
+                    ? 'bg-orange-500 dark:bg-orange-600 text-white'
                     : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200 dark:border-zinc-700'
                   }`}
                 >
@@ -275,14 +275,14 @@ const ChatBot = ({ isOpen, onClose }) => {
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type your message..."
-              className="flex-1 resize-none rounded-xl border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+              className="flex-1 resize-none rounded-xl border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
               rows="1"
               style={{ maxHeight: '100px' }}
             />
             <button
               onClick={handleSendMessage}
               disabled={inputMessage.trim() === ''}
-              className="bg-pink-500 dark:bg-pink-600 text-white rounded-xl px-4 py-2 hover:bg-pink-600 dark:hover:bg-pink-700 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-orange-500 dark:bg-orange-600 text-white rounded-xl px-4 py-2 hover:bg-orange-600 dark:hover:bg-orange-700 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -299,3 +299,5 @@ const ChatBot = ({ isOpen, onClose }) => {
 }
 
 export default ChatBot
+
+

@@ -85,10 +85,10 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-zinc-50 dark:bg-zinc-950 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#f7f3ee] dark:bg-[#0f1515] relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-24 -right-24 w-72 h-72 bg-purple-200/40 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-pink-200/40 rounded-full blur-3xl"></div>
+        <div className="absolute -top-24 -right-24 w-72 h-72 bg-emerald-200/40 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-orange-200/40 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative w-full max-w-2xl">
@@ -123,7 +123,7 @@ const SignUp = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
@@ -133,7 +133,7 @@ const SignUp = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+                    className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
                     placeholder="Jane Doe"
                     required
                   />
@@ -147,7 +147,7 @@ const SignUp = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                     </svg>
                   </div>
@@ -157,7 +157,7 @@ const SignUp = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+                    className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
                     placeholder="you@example.com"
                     required
                   />
@@ -171,7 +171,7 @@ const SignUp = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   </div>
@@ -181,7 +181,7 @@ const SignUp = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+                    className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
                     placeholder="••••••••"
                     required
                     minLength={6}
@@ -196,7 +196,7 @@ const SignUp = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
@@ -206,7 +206,7 @@ const SignUp = () => {
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+                    className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
                     placeholder="••••••••"
                     required
                     minLength={6}
@@ -221,7 +221,7 @@ const SignUp = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
                   </div>
@@ -231,7 +231,7 @@ const SignUp = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+                    className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
                     placeholder="1234567890"
                     pattern="[0-9]{10}"
                   />
@@ -245,7 +245,7 @@ const SignUp = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
@@ -255,7 +255,7 @@ const SignUp = () => {
                     name="dateOfBirth"
                     value={formData.dateOfBirth}
                     onChange={handleChange}
-                    className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+                    className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
                   />
                 </div>
               </div>
@@ -265,7 +265,7 @@ const SignUp = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-6 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full py-3 px-6 bg-linear-to-r from-emerald-600 to-orange-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -283,9 +283,9 @@ const SignUp = () => {
             {/* Terms */}
             <p className="text-xs text-zinc-500 text-center">
               By signing up, you agree to our{' '}
-              <a href="#" className="text-purple-600 hover:underline">Terms of Service</a>
+              <a href="#" className="text-emerald-700 hover:underline">Terms of Service</a>
               {' '}and{' '}
-              <a href="#" className="text-purple-600 hover:underline">Privacy Policy</a>
+              <a href="#" className="text-emerald-700 hover:underline">Privacy Policy</a>
             </p>
           </form>
 
@@ -300,7 +300,7 @@ const SignUp = () => {
           <div className="mt-6 text-center">
             <p className="text-zinc-600 dark:text-zinc-300">
               Already have an account?{' '}
-              <Link to="/login" className="text-purple-600 font-semibold hover:text-purple-700 transition-colors">
+              <Link to="/login" className="text-emerald-700 font-semibold hover:text-emerald-800 transition-colors">
                 Login here
               </Link>
             </p>
@@ -335,3 +335,5 @@ const SignUp = () => {
 };
 
 export default SignUp;
+
+

@@ -121,7 +121,7 @@ router.post('/message', protect, async (req, res) => {
 });
 
 // @route   POST /api/chat/insights
-// @desc    Get personalized health insights using Gemini AI
+// @desc    Get personalized health insights using Groq AI
 // @access  Private
 router.post('/insights', protect, async (req, res) => {
   try {

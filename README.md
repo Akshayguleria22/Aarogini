@@ -193,7 +193,15 @@ The frontend will be available at: `http://localhost:5173`
 cd backend
 npm start
 ```
-The backend will be available at: `http://localhost:3000`
+The backend will be available at: `http://localhost:5000`
+
+#### Start ML Service (Optional but recommended)
+```bash
+cd ml-service
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+The ML service will be available at: `http://localhost:8000`
 
 ### Production Build
 
@@ -294,6 +302,39 @@ export default {
   }
 }
 ```
+
+---
+
+## Deployment (Render + Vercel)
+
+### Backend (Render)
+1. Create a new Web Service from the `backend` folder.
+2. Build command: `npm install`
+3. Start command: `node index.js`
+4. Add environment variables (Render dashboard):
+   - `GROQ_API_KEY`
+   - `JWT_SECRET`
+   - `JWT_EXPIRE` (example: `30d`)
+   - `MONGODB_URI`
+   - `CLIENT_URL` (your Vercel frontend URL)
+   - `OPENFDA_API_KEY` (optional)
+   - `GNEWS_API_KEY` (optional)
+   - `ML_BASE_URL` (URL of the ML service)
+   - `NODE_ENV=production`
+5. If you plan to store uploads, add a Render persistent disk and point `uploads/` to it.
+
+### ML Service (Render)
+1. Create a new Web Service from the `ml-service` folder.
+2. Build command: `pip install -r requirements.txt`
+3. Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+4. Update backend `ML_BASE_URL` to the Render ML service URL.
+
+### Frontend (Vercel)
+1. Import the repository and select the `frontend` folder as the root.
+2. Add `VITE_API_URL` as an environment variable set to:
+   - `https://<your-backend>.onrender.com/api`
+3. Build command: `npm run build`
+4. Output directory: `dist`
 
 ---
 
