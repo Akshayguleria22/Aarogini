@@ -1,5 +1,5 @@
 import express from "express";
-import { runDoctorAI } from "../services/doctorAI.js";
+import { runDoctorAI } from "../services/doctorAi.js";
 import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
