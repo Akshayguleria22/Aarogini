@@ -174,11 +174,11 @@ const HealthJourney = ({ loading }) => {
       </div>
       
       {/* Scrollable Health Cards - 2 Rows x 4 Columns Sliding Horizontally */}
-      <div className="relative" style={{ height: '520px' }}>
+        <div className="relative health-journey-track">
         {/* Left Arrow Button */}
         <button
           onClick={scrollLeft}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg hover:shadow-xl rounded-full p-3 transition-all duration-300 group"
+            className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg hover:shadow-xl rounded-full p-3 transition-all duration-300 group"
           aria-label="Scroll left"
         >
           <svg 
@@ -194,7 +194,7 @@ const HealthJourney = ({ loading }) => {
         {/* Right Arrow Button */}
         <button
           onClick={scrollRight}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg hover:shadow-xl rounded-full p-3 transition-all duration-300 group"
+            className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg hover:shadow-xl rounded-full p-3 transition-all duration-300 group"
           aria-label="Scroll right"
         >
           <svg 
@@ -212,17 +212,12 @@ const HealthJourney = ({ loading }) => {
           className="overflow-x-auto overflow-y-hidden scrollbar-hide h-full snap-x snap-mandatory hw-accelerate"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         >
-          <div className="inline-grid grid-rows-2 grid-flow-col gap-3 h-full pb-2">
+            <div className="inline-grid grid-flow-col auto-cols-max gap-3 h-full pb-2 md:grid-rows-2 md:grid-flow-col">
               {isLoading ? (
                 Array.from({ length: 8 }).map((_, index) => (
                   <div
                     key={index}
-                    className="snap-start"
-                    style={{
-                      width: 'calc((100vw - 120px) / 4)',
-                      minWidth: '200px',
-                      maxWidth: '300px'
-                    }}
+                    className="snap-start health-journey-card"
                   >
                     <div className="bg-white/80 dark:bg-zinc-900/90 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                       <Skeleton className="w-16 h-16 rounded-full mb-4" />
@@ -236,12 +231,9 @@ const HealthJourney = ({ loading }) => {
                 healthJourney.map((item, index) => (
                   <div
                     key={index}
-                    className="group snap-start animate-fade-in-up"
+                    className="group snap-start animate-fade-in-up health-journey-card"
                     style={{
-                      animationDelay: `${index * 40 + 600}ms`,
-                      width: 'calc((100vw - 120px) / 4)',
-                      minWidth: '200px',
-                      maxWidth: '300px'
+                      animationDelay: `${index * 40 + 600}ms`
                     }}
                   >
                     <div
@@ -390,4 +382,3 @@ const HealthJourney = ({ loading }) => {
 }
 
 export default HealthJourney
-

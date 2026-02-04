@@ -39,37 +39,37 @@ const Landing = () => {
       </div>
       <ModernHeader />
 
-      <main className="relative z-10 flex-1 px-8 pb-10 flex flex-col pt-24">
+      <main className="relative z-10 flex-1 px-4 sm:px-6 lg:px-8 pb-10 flex flex-col pt-24">
         {/* Hero */}
-        <section className="flex flex-col lg:flex-row items-center gap-10">
+        <section className="flex flex-col lg:flex-row items-center gap-8 lg:gap-10">
           <div className="flex-1">
             <p className="text-sm uppercase tracking-widest text-emerald-700 font-semibold">Aarogini</p>
-            <h1 className="text-5xl font-bold leading-tight text-zinc-900 dark:text-zinc-100 mt-3">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-zinc-900 dark:text-zinc-100 mt-3">
               A calm, caring space for your
               <span className="block bg-linear-to-r from-emerald-600 via-teal-500 to-orange-400 bg-clip-text text-transparent">
                 everyday health journey
               </span>
             </h1>
-            <p className="text-lg text-zinc-600 dark:text-zinc-300 mt-4 max-w-2xl">
+            <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-300 mt-4 max-w-2xl">
               Aarogini helps women track cycles, understand reports, and stay supported with
               personalized insights, expert-backed content, and a friendly AI companion.
             </p>
-            <div className="mt-6 flex items-center gap-3">
-              <Link to={isAuthenticated ? "/" : "/signup"} className="px-6 py-3 rounded-full bg-linear-to-r from-emerald-600 to-orange-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all">
+            <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
+              <Link to={isAuthenticated ? "/" : "/signup"} className="px-6 py-3 rounded-full bg-linear-to-r from-emerald-600 to-orange-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all text-center w-full sm:w-auto">
                 Get Started
               </Link>
               {!isAuthenticated && (
-                <Link to="/login" className="px-6 py-3 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 font-semibold hover:bg-white/70 dark:hover:bg-zinc-900">
+                <Link to="/login" className="px-6 py-3 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 font-semibold hover:bg-white/70 dark:hover:bg-zinc-900 text-center w-full sm:w-auto">
                   Log in
                 </Link>
               )}
               {isAuthenticated && (
-                <Link to="/" className="px-6 py-3 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 font-semibold hover:bg-white/70 dark:hover:bg-zinc-900">
+                <Link to="/" className="px-6 py-3 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 font-semibold hover:bg-white/70 dark:hover:bg-zinc-900 text-center w-full sm:w-auto">
                   Home
                 </Link>
               )}
             </div>
-            <div className="mt-6 flex items-center gap-6 text-sm text-zinc-500">
+            <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-zinc-500">
               <span>Private & secure</span>
               <span>Clinically-informed content</span>
               <span>Made for every life stage</span>
@@ -80,7 +80,7 @@ const Landing = () => {
             <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur rounded-3xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-lg">
               <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Today in your journey</h3>
               <p className="text-sm text-zinc-500 mt-1">A preview of your personalized dashboard</p>
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {['Cycle status', 'Energy', 'Mood', 'Hydration'].map((label) => (
                   <div key={label} className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900">
                     <p className="text-xs text-zinc-500">{label}</p>
@@ -122,12 +122,12 @@ const Landing = () => {
         </section>
 
         {/* CTA */}
-        <section className="mt-12 rounded-3xl bg-linear-to-r from-emerald-600 to-orange-500 text-white p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <section className="mt-12 rounded-3xl bg-linear-to-r from-emerald-600 to-orange-500 text-white p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <h3 className="text-2xl font-bold">Start your personalized health journey</h3>
+            <h3 className="text-xl sm:text-2xl font-bold">Start your personalized health journey</h3>
             <p className="text-sm text-white/90 mt-2">Create a free account and unlock your dashboard, trackers, and insights.</p>
           </div>
-          <Link to={isAuthenticated ? "/" : "/signup"} className="px-6 py-3 rounded-full bg-white text-emerald-700 font-semibold shadow-lg">
+          <Link to={isAuthenticated ? "/" : "/signup"} className="px-6 py-3 rounded-full bg-white text-emerald-700 font-semibold shadow-lg text-center w-full md:w-auto">
             {isAuthenticated ? 'Go to Home' : 'Create account'}
           </Link>
         </section>
@@ -139,4 +139,3 @@ const Landing = () => {
 }
 
 export default Landing
-

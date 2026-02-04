@@ -162,6 +162,41 @@
   animation-delay: 4s;
 }
 
+/* Responsive helpers */
+.health-journey-track {
+  height: 520px;
+}
+
+.health-journey-card {
+  width: clamp(180px, 44vw, 280px);
+  min-width: 180px;
+  max-width: 300px;
+}
+
+@media (min-width: 768px) {
+  .health-journey-track {
+    height: 500px;
+  }
+  .health-journey-card {
+    width: clamp(200px, 26vw, 300px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .health-journey-track {
+    height: 520px;
+  }
+  .health-journey-card {
+    width: clamp(220px, 20vw, 300px);
+  }
+}
+
+@media (max-width: 640px) {
+  .health-journey-track {
+    height: 360px;
+  }
+}
+
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }

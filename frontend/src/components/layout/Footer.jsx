@@ -4,32 +4,32 @@ import { Facebook, Instagram, Linkedin, Twitter, Mail } from 'lucide-react'
 const Footer = () => {
   const currentYear = new Date().getFullYear()
 
-  const footerLinks = {
-    about: [
-      { label: 'About Us', href: '#about' },
-      { label: 'Our Mission', href: '#mission' },
-      { label: 'Team', href: '#team' },
-      { label: 'Careers', href: '#careers' },
-    ],
-    resources: [
-      { label: 'Health Articles', href: '#articles' },
-      { label: 'Blog', href: '#blog' },
-      { label: 'FAQs', href: '#faq' },
-      { label: 'Support Center', href: '#support' },
-    ],
-    legal: [
-      { label: 'Privacy Policy', href: '#privacy' },
-      { label: 'Terms of Service', href: '#terms' },
-      { label: 'Cookie Policy', href: '#cookies' },
-      { label: 'Disclaimer', href: '#disclaimer' },
-    ],
-    connect: [
-      { label: 'Contact Us', href: '#contact' },
-      { label: 'Feedback', href: '#feedback' },
-      { label: 'Community', href: '#community' },
-      { label: 'Newsletter', href: '#newsletter' },
-    ],
-  }
+  // const footerLinks = {
+  //   about: [
+  //     { label: 'About Us', href: '#about' },
+  //     { label: 'Our Mission', href: '#mission' },
+  //     { label: 'Team', href: '#team' },
+  //     { label: 'Careers', href: '#careers' },
+  //   ],
+  //   resources: [
+  //     { label: 'Health Articles', href: '#articles' },
+  //     { label: 'Blog', href: '#blog' },
+  //     { label: 'FAQs', href: '#faq' },
+  //     { label: 'Support Center', href: '#support' },
+  //   ],
+  //   legal: [
+  //     { label: 'Privacy Policy', href: '#privacy' },
+  //     { label: 'Terms of Service', href: '#terms' },
+  //     { label: 'Cookie Policy', href: '#cookies' },
+  //     { label: 'Disclaimer', href: '#disclaimer' },
+  //   ],
+  //   connect: [
+  //     { label: 'Contact Us', href: '#contact' },
+  //     { label: 'Feedback', href: '#feedback' },
+  //     { label: 'Community', href: '#community' },
+  //     { label: 'Newsletter', href: '#newsletter' },
+  //   ],
+  // }
 
   const socialLinks = [
     { icon: Facebook, name: 'Facebook', href: '#facebook' },
@@ -69,7 +69,7 @@ const Footer = () => {
               </div>
             </div>
 
-            <div>
+            {/* <div>
               <h4 className="text-lg font-semibold mb-4">About</h4>
               <ul className="space-y-2">
                 {footerLinks.about.map((link, index) => (
@@ -83,9 +83,9 @@ const Footer = () => {
                   </li>
                 ))}
               </ul>
-            </div>
+            </div> */}
 
-            <div>
+            {/* <div>
               <h4 className="text-lg font-semibold mb-4">Resources</h4>
               <ul className="space-y-2">
                 {footerLinks.resources.map((link, index) => (
@@ -99,9 +99,9 @@ const Footer = () => {
                   </li>
                 ))}
               </ul>
-            </div>
+            </div> */}
 
-            <div>
+            {/* <div>
               <h4 className="text-lg font-semibold mb-4">Legal</h4>
               <ul className="space-y-2">
                 {footerLinks.legal.map((link, index) => (
@@ -115,9 +115,9 @@ const Footer = () => {
                   </li>
                 ))}
               </ul>
-            </div>
+            </div> */}
 
-            <div>
+            {/* <div>
               <h4 className="text-lg font-semibold mb-4">Connect</h4>
               <ul className="space-y-2">
                 {footerLinks.connect.map((link, index) => (
@@ -132,6 +132,8 @@ const Footer = () => {
                 ))}
               </ul>
             </div>
+          </div> */}
+
           </div>
 
           <div className="border-t border-white/10 pt-8 mb-8">

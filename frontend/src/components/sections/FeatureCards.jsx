@@ -12,7 +12,7 @@ const FeatureCards = ({ activeFeature, setActiveFeature, loading }) => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}
